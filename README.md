@@ -43,7 +43,7 @@ The Vue instance is preconfigured with Filters, Vue-Router, Vuex; each of these 
 ##### Prerequisites
 
 - [X] Node v11.15.0 (had issues with 12 and 13)
-- [X] Yarn
+- [X] Yarn (using 1.x global install)
 - [X] Vue Cli 3
 - [X] Python 3
 - [X] Pipenv
@@ -52,27 +52,23 @@ The Vue instance is preconfigured with Filters, Vue-Router, Vuex; each of these 
 ##### Install Dependencies
 
 * Clone this repository:
-
 	```
 	$ git clone https://github.com/MingusKhan/cats-against-humanity.git
 	```
  
 * Setup node
-
 	```
 	$ npm install --global windows-build-tools
 	$ npm config set python python2.7
 	```
 
 * Setup virtual environment, install dependencies, and activate it:
-
 	```
 	$ pipenv install --dev
 	$ pipenv shell
 	```
 
 * Install JS dependencies
-
 	```
 	$ yarn install
 	```
@@ -81,13 +77,11 @@ The Vue instance is preconfigured with Filters, Vue-Router, Vuex; each of these 
 ## Development Server
 
 Run Flask Api development server:
-
 ```
 $ python run.py
 ```
 
 From another tab in the same directory, start the webpack dev server:
-
 ```
 $ yarn serve
 ```
@@ -104,12 +98,10 @@ back to Flask's Api on port 5000.
 If you would rather run a single dev server, you can run Flask's
 development server only on `:5000`, but you have to build build the Vue app first
 and the page will not reload on changes.
-
 ```
 $ yarn build
 $ python run.py
 ```
-
 
 ## Production Server
 
