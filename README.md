@@ -1,42 +1,7 @@
-# Flask-VueJs-Template 🌶️✌
+# Cats Against Humanity 🙀 
 
-[![Build Status](https://travis-ci.org/gtalarico/flask-vuejs-template.svg?branch=master)](https://travis-ci.org/gtalarico/flask-vuejs-template)
-[![codecov](https://codecov.io/gh/gtalarico/flask-vuejs-template/branch/master/graph/badge.svg)](https://codecov.io/gh/gtalarico/flask-vuejs-template)
+_Cards against humanity web app (with added cat)_
 
-_Flask + Vue.js Web Application Template_
-
-![Vue Logo](/docs/vue-logo.png "Vue Logo") ![Flask Logo](/docs/flask-logo.png "Flask Logo")
-
-## Features
-* Minimal Flask 1.0 App
-* [Flask-RestPlus](http://flask-restplus.readthedocs.io) API with class-based secure resource routing
-* Starter [PyTest](http://pytest.org) test suite
-* [vue-cli 3](https://github.com/vuejs/vue-cli/blob/dev/docs/README.md) + yarn
-* [Vuex](https://vuex.vuejs.org/)
-* [Vue Router](https://router.vuejs.org/)
-* [Axios](https://github.com/axios/axios/) for backend communication
-* Sample Vue [Filters](https://vuejs.org/v2/guide/filters.html)
-* Heroku Configuration with one-click deployment + Gunicorn
-
-## Demo
-[Live Demo](https://flask-vuejs-template.herokuapp.com/#/api)
-
-## Alternatives
-
-If this setup is not what you are looking for, here are some similar projects:
-
-* [oleg-agapov/flask-vue-spa](https://github.com/oleg-agapov/flask-vue-spa)
-* [testdrivenio/flask-vue-crud](https://github.com/testdrivenio/flask-vue-crud)
-
-#### Old Template
-
-This template was updated to use a flatter folder structure and use yarn instead of npm.
-You can now run `yarn serve` as well as other yarn commands from the template root directory.
-The old template will be kept in the [npm-template branch](https://github.com/gtalarico/flask-vuejs-template/tree/npm-template) but will not be maintained. 
-
-#### Django
-
-Prefer Django? Checkout the [gtalarico/django-vue-template](https://github.com/gtalarico/django-vue-template)
 
 ## Template Structure
 
@@ -73,24 +38,30 @@ The Vue instance is preconfigured with Filters, Vue-Router, Vuex; each of these 
 | `/dist/`             | Bundled Assets Output (generated at `yarn build` |
 
 
-## Installation
+## Setup
 
-##### Before you start
+##### Prerequisites
 
-Before getting started, you should have the following installed and running:
-
-- [X] Yarn - [instructions](https://yarnpkg.com/en/docs/install#mac-stable)
-- [X] Vue Cli 3 - [instructions](https://cli.vuejs.org/guide/installation.html)
+- [X] Node v11.15.0 (had issues with 12 and 13)
+- [X] Yarn
+- [X] Vue Cli 3
 - [X] Python 3
-- [X] Pipenv (optional)
-- [X] Heroku Cli (if deploying to Heroku)
+- [X] Pipenv
+- [X] Heroku Cli
 
-##### Template and Dependencies
+##### Install Dependencies
 
 * Clone this repository:
 
 	```
-	$ git clone https://github.com/gtalarico/flask-vuejs-template.git
+	$ git clone https://github.com/MingusKhan/cats-against-humanity.git
+	```
+ 
+* Setup node
+
+	```
+	$ npm install --global windows-build-tools
+	$ npm config set python python2.7
 	```
 
 * Setup virtual environment, install dependencies, and activate it:
@@ -160,8 +131,8 @@ The python buildpack will detect the `Pipfile` and install all the python depend
 Here are the commands we need to run to get things setup on the Heroku side:
 
 	```
-	$ heroku apps:create flask-vuejs-template-demo
-	$ heroku git:remote --app flask-vuejs-template-demo
+	$ heroku apps:create cats-against-humanity
+	$ heroku git:remote --app cats-against-humanity
 	$ heroku buildpacks:add --index 1 heroku/nodejs
 	$ heroku buildpacks:add --index 2 heroku/python
 	$ heroku config:set FLASK_ENV=production
@@ -171,5 +142,4 @@ Here are the commands we need to run to get things setup on the Heroku side:
 	```
 
 ### Heroku deployment - One Click Deploy
-
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/gtalarico/flask-vuejs-template)
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/MingusKhan/cats-against-humanity)

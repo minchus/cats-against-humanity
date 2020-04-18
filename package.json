@@ -11,6 +11,7 @@
   "dependencies": {
     "@vue/cli": "^4.3.1",
     "axios": "^0.18.0",
+    "babel-loader": "^8.1.0",
     "core-js": "^3.6.5",
     "vue": "^2.5.13",
     "vue-router": "^3.0.1",
@@ -28,7 +29,12 @@
   },
   "babel": {
     "presets": [
-      "@vue/app"
+      [
+        "@vue/app",
+        {
+          "useBuiltIns": "entry"
+        }
+      ]
     ]
   },
   "eslintConfig": {
