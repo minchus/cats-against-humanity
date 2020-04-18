@@ -131,7 +131,8 @@ Here are the commands we need to run to get things setup on the Heroku side:
 	$ heroku config:set FLASK_SECRET=SuperSecretKey
 
 	$ git push heroku
-	```
 
+	$ heroku ps:scale web=1
+	```
 ### Heroku deployment - One Click Deploy
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/MingusKhan/cats-against-humanity)
