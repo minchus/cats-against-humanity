@@ -1,8 +1,7 @@
-import os
-from app import app
+import eventlet
+from app import app, socketio
 
-app.run(port=5000)
-
+socketio.run(app, host='0.0.0.0', port=5000, debug=True)
 # To Run:
 # python run.py
 # or

@@ -4,8 +4,10 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+eventlet = "*"
 gunicorn = "==19.7.1"
 flask-restplus = "*"
+flask_socketio = "*"
 python-dotenv = "*"
 flask = "*"
 
