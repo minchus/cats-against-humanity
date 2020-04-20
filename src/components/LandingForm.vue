@@ -8,9 +8,14 @@
       <v-toolbar-title class="subtitle-1">Join a game or create a new one</v-toolbar-title>
     </v-toolbar>
     <v-card-text>
+        <v-text-field
+          label="Player name"
+          name="username"
+          type="text"
+        />
       <v-form>
         <v-text-field
-          label="Enter Room ID"
+          label="Room code (to join existing game)"
           name="room-id"
           type="text"
         />

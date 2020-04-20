@@ -1,4 +1,8 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, request
+from flask_socketio import SocketIO, join_room, leave_room, close_room, send, emit
+
+from app import socketio
+from app.cah import game
 
 cah_bp = Blueprint('cah', __name__,
                    url_prefix='',
@@ -7,17 +11,7 @@ cah_bp = Blueprint('cah', __name__,
                    template_folder='./dist/',
                    )
 
-from app import socketio
-
-from flask_socketio import SocketIO, join_room, leave_room, close_room, send, emit
-from dotenv import load_dotenv
-load_dotenv()
-
-from app.cah import game
-
-
 ROOMS = {}
-
 
 # def prune():
 #     """Prune rooms stale for more than 6 hours"""
@@ -57,19 +51,18 @@ ROOMS = {}
 
 @socketio.on('create')
 def on_create(data):
-    """Create a game lobby"""
-    # username = data['username']
-    # create the game
-    # handle custom wordbanks
-    # prune old rooms
-
-    room = 'XYZ'
-    # room = gm.game_id
-    # ROOMS[room] = gm
-    join_room(room)
-    # rooms[room].add_player(username)
-    emit('join_room', {'room': room})
-    # prune()
+    """Create a new game"""
+    try:
+        username = data['username']
+        gm = game.GameState()
+        room = gm.game_id
+        ROOMS[room] = gm
+        join_room(room)
+        # rooms[room].add_player(username)
+        emit('join_room', {'room': room})
+        # prune()
+    except Exception as e:
+        emit('join_room', {'error': f"Unable to create game"})
 
 
 @socketio.on('join')
