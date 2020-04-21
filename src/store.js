@@ -10,7 +10,8 @@ export default new Vuex.Store({
     room: '',
     username: '',
     error: null,
-    dealer: ''
+    dealer: '',
+    showJoin: true
   },
   getters: {
     words (state) {
@@ -57,6 +58,9 @@ export default new Vuex.Store({
     },
     reset_room (state) {
       state.game = {}
+    },
+    toggle_show_join (state) {
+      state.showJoin = !state.showJoin
     }
   }
 })

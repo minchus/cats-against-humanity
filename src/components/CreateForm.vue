@@ -9,19 +9,12 @@
           v-model="username"
           :rules="[rules.required]"
         ></v-text-field>
-        <v-text-field
-          label="Room code"
-          name="room_code"
-          type="text"
-          v-model="room_code"
-          :rules="[rules.required]"
-        ></v-text-field>
       </v-form>
     </v-card-text>
     <v-card-actions>
-      <v-btn color="grey lighten-2" class="black--text" @click="toggleIsJoin">Create game</v-btn>
+      <v-btn color="grey lighten-2" class="black--text" @click="toggleIsJoin">Back to join game</v-btn>
       <v-spacer />
-      <v-btn color="grey darken-2" class="white--text" @click="joinGame">Join</v-btn>
+      <v-btn color="grey darken-2" class="white--text" @click="createGame">Create game</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -30,11 +23,10 @@
 import { mapMutations } from 'vuex'
 
 export default {
-  name: 'join-form',
+  name: 'create-form',
   data () {
     return {
       username: '',
-      room_code: null,
       isValid: true,
       rules: {
         required: value => !!value || 'Required'
@@ -42,13 +34,11 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(['set_username', 'set_room', 'toggle_show_join']),
-    joinGame () {
+    ...mapMutations(['set_username', 'toggle_show_join']),
+    createGame () {
       this.$refs.form.validate()
       if (this.isValid) {
         this.set_username(this.username)
-        this.set_room(this.room_id)
-        this.$router.push({ name: 'Player', params: { room: this.room_code } })
       }
     },
     toggleIsJoin () {
