@@ -22,22 +22,22 @@ export default new Vuex.Store({
     }
   },
   mutations: {
-    SOCKET_connect (state) {
+    socket_connect (state) {
       state.connected = true
     },
-    SOCKET_disconnect (state) {
+    socket_disconnect (state) {
       state.connected = false
     },
-    SOCKET_message (state, message) {
+    socket_message (state, message) {
       state.game = message
       state.room = message.game_id
       state.error = null
     },
-    SOCKET_join_room (state, message) {
+    socket_join_room (state, message) {
       state.error = null
       state.room = message.room
     },
-    SOCKET_error (state, message) {
+    socket_error (state, message) {
       state.error = message.error
     },
     set_turn (state, team) {
