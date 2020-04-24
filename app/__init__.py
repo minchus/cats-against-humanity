@@ -1,11 +1,11 @@
-import os
 from flask import Flask, current_app, send_file
 from flask_socketio import SocketIO
+import logging
+import os
 
 
 app = Flask(__name__, static_folder='../dist/static')
-app.secret_key = os.getenv("SECRET_KEY", "")
-socketio = SocketIO(app)
+socket_io_app = SocketIO(app, cors_allowed_origins='http://localhost:8080')
 
 
 # from .api import api_bp
@@ -15,6 +15,7 @@ app.register_blueprint(cah_bp)
 
 
 from .config import Config
+logging.basicConfig(format="[%(pathname)s:%(lineno)s - %(funcName)s() ] %(message)s")
 app.logger.info('>>> {}'.format(Config.FLASK_ENV))
 
 

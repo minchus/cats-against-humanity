@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from flask_socketio import SocketIO, join_room, leave_room, close_room, send, emit
 
-from app import socketio
+from app import socket_io_app, app
 from app.cah import game
 
 cah_bp = Blueprint('cah', __name__,
@@ -49,10 +49,11 @@ ROOMS = {}
 #     return jsonify(resp)
 
 
-@socketio.on('create')
+@socket_io_app.on('create')
 def on_create(data):
     """Create a new game"""
     try:
+        app.logger.info(data)
         username = data['username']
         gm = game.GameState()
         room = gm.game_id
@@ -65,7 +66,7 @@ def on_create(data):
         emit('join_room', {'error': f"Unable to create game"})
 
 
-@socketio.on('join')
+@socket_io_app.on('join')
 def on_join(data):
     """Join a game lobby"""
     # username = data['username']
@@ -79,7 +80,7 @@ def on_join(data):
         emit('error', {'error': 'Unable to join room. Room does not exist.'})
 
 
-@socketio.on('leave')
+@socket_io_app.on('leave')
 def on_leave(data):
     """Leave the game lobby"""
     # username = data['username']

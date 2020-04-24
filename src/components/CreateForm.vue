@@ -12,7 +12,7 @@
       </v-form>
     </v-card-text>
     <v-card-actions>
-      <v-btn color="grey lighten-2" class="black--text" @click="toggleIsJoin">Back to join game</v-btn>
+      <v-btn color="grey lighten-2" class="black--text" @click="toggleIsJoin">Back to join</v-btn>
       <v-spacer />
       <v-btn color="grey darken-2" class="white--text" @click="createGame">Create game</v-btn>
     </v-card-actions>
@@ -39,6 +39,7 @@ export default {
       this.$refs.form.validate()
       if (this.isValid) {
         this.set_username(this.username)
+        this.$socket.emit('create', { username: this.username })
       }
     },
     toggleIsJoin () {

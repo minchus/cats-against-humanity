@@ -1,8 +1,6 @@
 import eventlet
-from app import app, socketio
+from app import app, socket_io_app
+import os
 
-socketio.run(app, host='0.0.0.0', port=5000, debug=True)
-# To Run:
-# python run.py
-# or
-# python -m flask run
+os.environ['FLASK_ENV'] = 'development'
+socket_io_app.run(app, host='0.0.0.0', port=5000, debug=True)

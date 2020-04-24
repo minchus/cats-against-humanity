@@ -1,12 +1,25 @@
 import Vue from 'vue'
+import VueSocketIO from 'vue-socket.io'
+import vuetify from './plugins/vuetify'
+
 import App from './App.vue'
 import router from './router'
 import store from './store'
-
 import './filters'
-import vuetify from './plugins/vuetify'
 
 Vue.config.productionTip = false
+
+// Vue.use(VueSocketIO, `//${window.location.host}`, store)
+
+Vue.use(new VueSocketIO({
+  debug: true,
+  connection: `//${window.location.host}`,
+  vuex: {
+    store,
+    actionPrefix: 'SOCKET_',
+    mutationPrefix: 'SOCKET_'
+  }
+}))
 
 new Vue({
   router,

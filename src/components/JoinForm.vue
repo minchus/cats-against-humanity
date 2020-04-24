@@ -48,7 +48,7 @@ export default {
       if (this.isValid) {
         this.set_username(this.username)
         this.set_room(this.room_id)
-        this.$router.push({ name: 'Player', params: { room: this.room_code } })
+        // this.$router.push({ name: 'Player', params: { room: this.room_code } })
       }
     },
     toggleIsJoin () {

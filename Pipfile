@@ -5,11 +5,11 @@ name = "pypi"
 
 [packages]
 eventlet = "*"
-gunicorn = "==19.7.1"
+flask = "*"
 flask-restplus = "*"
 flask_socketio = "*"
+gunicorn = "==19.7.1"
 python-dotenv = "*"
-flask = "*"
 
 [dev-packages]
 pytest = "*"
