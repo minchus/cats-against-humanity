@@ -1,5 +1,5 @@
-"""Object for tracking game status"""
 from datetime import datetime
+from functools import singledispatch
 import json
 from os.path import join, abspath, dirname
 import random
@@ -10,27 +10,54 @@ APP_ROOT = abspath(join(dirname(__file__), ".."))
 
 
 class Player:
-    def __init__(self, name, is_dealer):
+    def __init__(self, name, initial_cards):
         self.name = name
-        self.hand = []
-        self.is_dealer = is_dealer
         self.score = 0
+        self.hand = dict.fromkeys(initial_cards)
+        self.selected_card = ""
+
+    def to_serializable(self):
+        return self.__dict__
+
+
+class CardDeck:
+    def __init__(self, card_list):
+        self.cards = card_list
+
+    def draw(self, n):
+        if 1 <= n <= len(self.cards):
+            ret = self.cards[-n:]
+            del self.cards[-n:]
+            return ret
+        return []
 
 
 class GameState:
     def __init__(self):
         self.game_id = self.generate_room_id()
+        self.players = {}  # player_name: Player()
+        self.dealer = ""
         self.date_created = datetime.now()
         self.date_modified = self.date_created
-        self.players = {}
+        self.white_deck, self.black_deck = self.load_cards(join(APP_ROOT, "card_data", "base.json"))
 
-        self.white_cards, self.black_cards = self.load_card_data(join(APP_ROOT, "card_data", "base.json"))
+        # TODO: Randomize card order
 
-    def to_json(self):
-        """Serialize object to JSON"""
+    @classmethod
+    def from_first_player(cls, first_player_name):
+        gs = cls()
+        gs.dealer = first_player_name
+        gs.players = {
+            first_player_name: Player(name=first_player_name,
+                                      initial_cards=gs.white_deck.draw(10))
+        }
+        return gs
+
+    def to_serializable(self):
         return {
             "game_id": self.game_id,
-            "players": self.players,
+            "players": {name: player.to_serializable() for name, player in self.players.items()},
+            "dealer": self.dealer,
             "date_created": str(self.date_created),
             "date_modified": str(self.date_modified),
             "playtime": self.playtime(),
@@ -59,12 +86,13 @@ class GameState:
         return round(float(d2_ts-d1_ts) / 60, 2)
 
     @staticmethod
-    def load_card_data(path):
+    def load_cards(path):
         with open(path, 'r') as f:
             json_data = json.load(f)
-        return json_data['blackCards'], json_data['whiteCards']
+        return CardDeck(json_data['whiteCards']), CardDeck(json_data['blackCards'])
 
 
 if __name__ == "__main__":
-    tmp = GameState()
+    x = GameState.from_first_player(first_player_name="john")
+    json.dumps(x.to_serializable())
     print("asdf")

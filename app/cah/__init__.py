@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from flask_socketio import SocketIO, join_room, leave_room, close_room, send, emit
+import flask_socketio as sio
 
 from app import socket_io_app, app
 from app.cah import game
@@ -51,33 +51,28 @@ ROOMS = {}
 
 @socket_io_app.on('create')
 def on_create(data):
-    """Create a new game"""
-    try:
-        app.logger.info(data)
-        username = data['username']
-        gm = game.GameState()
-        room = gm.game_id
-        ROOMS[room] = gm
-        join_room(room)
-        # rooms[room].add_player(username)
-        emit('join_room', {'room': room})
-        # prune()
-    except Exception as e:
-        emit('join_room', {'error': f"Unable to create game"})
+    app.logger.info(data)
+    g = game.GameState(first_player_name=data['username'])
+    room_code = g.game_id
+    ROOMS[room_code] = g
+    sio.join_room(room_code)
+    sio.emit('join_room', {'room': room_code})
+    # prune()
 
 
 @socket_io_app.on('join')
 def on_join(data):
-    """Join a game lobby"""
-    # username = data['username']
-    room = data['room']
-    if room in ROOMS:
-        # add player and rebroadcast game object
-        # rooms[room].add_player(username)
-        join_room(room)
-        send(ROOMS[room].to_json(), room=room)
+    app.logger.info(data)
+    room_code = data['room']
+    username = data['username']
+    if room_code in ROOMS:
+        if ROOMS[room_code].add_player(name=username):
+            sio.join_room(room_code)
+            sio.send(ROOMS[room_code].to_serializable(), room=room_code)  # broadcast room
+        else:
+            sio.emit('error', {'error': f'Unable to join room. A player with name {username} already exists'})
     else:
-        emit('error', {'error': 'Unable to join room. Room does not exist.'})
+        sio.emit('error', {'error': 'Unable to join room. Room does not exist.'})
 
 
 @socket_io_app.on('leave')
@@ -88,7 +83,7 @@ def on_leave(data):
     # add player and rebroadcast game object
     # rooms[room].remove_player(username)
     leave_room(room)
-    send(ROOMS[room].to_json(), room=room)
+    send(ROOMS[room].to_serializable(), room=room)
 
 
 # @socketio.on('flip_card')
