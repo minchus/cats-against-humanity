@@ -45,6 +45,15 @@ export default {
     toggleIsJoin () {
       this.toggle_show_join()
     }
+  },
+  sockets: {
+    message: function (data) {
+      console.log('game state received')
+      this.$router.push({
+        name: 'Player',
+        params: { room: data.room_code, player: this.username }
+      })
+    }
   }
 }
 </script>

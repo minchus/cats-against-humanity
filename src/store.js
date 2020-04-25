@@ -7,7 +7,7 @@ export default new Vuex.Store({
   state: {
     connected: false,
     game: {},
-    room: '',
+    roomCode: '',
     username: '',
     error: null,
     dealer: '',
@@ -30,37 +30,31 @@ export default new Vuex.Store({
     },
     socket_message (state, message) {
       state.game = message
-      state.room = message.game_id
+      state.roomCode = message.room_code
       state.error = null
-    },
-    socket_join_room (state, message) {
-      state.error = null
-      state.room = message.room
     },
     socket_error (state, message) {
       state.error = message.error
-    },
-    set_turn (state, team) {
-      state.turn = team
     },
     set_game (state, game) {
       state.game = game
     },
     set_room (state, room) {
-      state.room = room
+      state.roomCode = room
     },
     set_username (state, username) {
       state.username = username
     },
     reset_error (state) {
-      state.room = null
       state.error = null
     },
     reset_room (state) {
+      state.room = ''
       state.game = {}
     },
     toggle_show_join (state) {
       state.showJoin = !state.showJoin
+      state.error = null
     }
   }
 })

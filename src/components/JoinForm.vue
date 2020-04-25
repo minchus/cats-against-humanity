@@ -2,6 +2,9 @@
   <v-card class="elevation-12">
     <v-card-text>
       <v-form ref='form' v-model='isValid'>
+        <v-alert type="error" :value="!!error" transition="slide-y-reverse-transition">
+          {{ error }}
+        </v-alert>
         <v-text-field
           label="Player name"
           name="username"
@@ -13,7 +16,7 @@
           label="Room code"
           name="room_code"
           type="text"
-          v-model="room_code"
+          v-model="room"
           :rules="[rules.required]"
         ></v-text-field>
       </v-form>
@@ -27,19 +30,22 @@
 </template>
 
 <script>
-import { mapMutations } from 'vuex'
+import { mapMutations, mapState } from 'vuex'
 
 export default {
   name: 'join-form',
   data () {
     return {
       username: '',
-      room_code: null,
+      room: null,
       isValid: true,
       rules: {
         required: value => !!value || 'Required'
       }
     }
+  },
+  computed: {
+    ...mapState(['error'])
   },
   methods: {
     ...mapMutations(['set_username', 'set_room', 'toggle_show_join']),
@@ -47,12 +53,20 @@ export default {
       this.$refs.form.validate()
       if (this.isValid) {
         this.set_username(this.username)
-        this.set_room(this.room_id)
-        // this.$router.push({ name: 'Player', params: { room: this.room_code } })
+        this.$socket.emit('join', { room: this.room, username: this.username })
       }
     },
     toggleIsJoin () {
       this.toggle_show_join()
+    }
+  },
+  sockets: {
+    message: function (data) {
+      console.log('game state received')
+      this.$router.push({
+        name: 'Player',
+        params: { room: data.room_code, player: this.username }
+      })
     }
   }
 }

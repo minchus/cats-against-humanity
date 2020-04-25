@@ -9,8 +9,6 @@ import './filters'
 
 Vue.config.productionTip = false
 
-// Vue.use(VueSocketIO, `//${window.location.host}`, store)
-
 Vue.use(new VueSocketIO({
   debug: true,
   connection: `//${window.location.host}`,
