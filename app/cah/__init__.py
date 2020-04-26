@@ -49,9 +49,9 @@ def on_join(data):
         sio.join_room(g.room_code)
         sio.send(g.serialize(), room=g.room_code)
     except RoomManager.NoRoomError:
-        sio.emit('error', {'error': 'Unable to join room. Room does not exist.'})
+        sio.emit('error', {'error': 'Room does not exist.'})
     except Game.PlayerExistsError:
-        sio.emit('error', {'error': f'Unable to join room. A player with name {username} already exists.'})
+        sio.emit('error', {'error': f'A player with name {username} already exists in room {room_code}.'})
 
 
 @socket_io_app.on('leave')

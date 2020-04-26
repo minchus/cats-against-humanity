@@ -1,19 +1,21 @@
 <template>
-  <v-layout align-start justify-center text-xs-center row wrap>
-    <v-flex lg3 md5 sm8 xs12>
-      <v-card class="mt-10 text-xs-left">
-        <v-toolbar
-          color="grey darken-2"
-          dark
-          flat
-        >
-          <v-toolbar-title class="subtitle-1">Join a game or start a new one</v-toolbar-title>
-        </v-toolbar>
-        <join-form v-if="showJoin"></join-form>
-        <create-form v-else></create-form>
-      </v-card>
-    </v-flex>
-  </v-layout>
+  <v-container>
+    <v-row align="start" justify="center">
+      <v-col lg="5" md="6" sm="7" xs="12">
+        <v-card class="mt-10 text-xs-left">
+          <v-toolbar
+            color="grey darken-2"
+            dark
+            flat
+          >
+            <v-toolbar-title class="subtitle-1">Join a game or start a new one</v-toolbar-title>
+          </v-toolbar>
+          <join-form v-if="showJoin"></join-form>
+          <create-form v-else></create-form>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>

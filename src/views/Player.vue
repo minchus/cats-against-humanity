@@ -1,16 +1,15 @@
 <template>
-  <v-card class="elevation-12">
-    <v-card-text>Sample text</v-card-text>
-  </v-card>
+  <game-board></game-board>
 </template>
 
 <script>
 import { mapState, mapMutations } from 'vuex'
+import GameBoard from '../components/GameBoard'
 
 export default {
   name: 'player',
   components: {
-    // GameBoard
+    GameBoard
   },
   computed: {
     ...mapState(['room', 'username']),
@@ -19,8 +18,9 @@ export default {
     }
   },
   mounted () {
-    if (!this.username) this.set_username('#unknown')
-    if (!this.room) this.set_room(this.$route.params.room)
+    // join game if e.g. this page was reached by typing address in bar
+    // if (!this.username) this.set_username('#unknown')
+    // if (!this.room) this.set_room(this.$route.params.room)
     // const params = {
     //   username: this.username,
     //   room: this.room

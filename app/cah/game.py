@@ -1,6 +1,7 @@
 from datetime import datetime
-from functools import singledispatch
+import flask_socketio as sio
 import json
+import gc
 from os.path import join, abspath, dirname
 import random
 import string
@@ -38,25 +39,17 @@ class RoomManager:
 
     @classmethod
     def prune(cls):
-        pass
-#     """Prune rooms stale for more than 6 hours"""
-#     def delete_room(gid):
-#         close_room(gid)
-#         del ROOMS[gid]
-#
-#     def is_stale(room):
-#         """Stale rooms are older than 6 hours, or have gone 20 minutes less than 5 minutes of total playtime"""
-#         return (((datetime.now() - room.date_modified).total_seconds() >= (60*60*24)) or
-#                 ((datetime.now() - room.date_modified).total_seconds() >= (60*20) and
-#                  room.playtime() <= 5))
-#
-#     if ROOMS:
-#         rooms = ROOMS.copy()
-#         for key in rooms.keys():
-#             if is_stale(ROOMS[key]):
-#                 delete_room(key)
-#         del rooms
-#         gc.collect()
+        def is_stale(room):
+            """Stale rooms are older than 6 hours, or have gone 20 minutes less than 5 minutes of total playtime"""
+            return (((datetime.now() - room.date_modified).total_seconds() >= (60*60*24)) or
+                    ((datetime.now() - room.date_modified).total_seconds() >= (60*20) and
+                     room.playtime() <= 5))
+
+        for room_code in cls.rooms.keys():
+            if is_stale(cls.rooms[room_code]):
+                sio.close_room(room_code)
+                cls.rooms.pop(room_code, None)
+        gc.collect()
 
 
 class Player:
@@ -76,6 +69,7 @@ class Player:
 class Deck:
     def __init__(self, card_list=[]):
         self.cards = card_list
+        self.discarded = []
 
     def draw(self, n):
         if 1 <= n <= len(self.cards):
@@ -87,6 +81,9 @@ class Deck:
     def shuffle(self):
         random.shuffle(self.cards)
 
+    def discard(self, card_list):
+        self.discarded.extend(card_list)
+
 
 class Game:
     def __init__(self, room_code):
@@ -95,17 +92,18 @@ class Game:
         self.dealer = ""
         self.date_created = datetime.now()
         self.date_modified = self.date_created
-        self.discard_deck = Deck()
 
         self.white_deck, self.black_deck = self.load_cards(join(APP_ROOT, "card_data", "base.json"))
         # self.white_deck.shuffle()
         # self.black_deck.shuffle()
+        self.current_black_card = self.black_deck.draw(n=1)[0]
 
     def serialize(self):
         return {
             "room_code": self.room_code,
             "players": {name: player.serialize() for name, player in self.players.items()},
             "dealer": self.dealer,
+            "black_card": self.current_black_card,
             "date_created": str(self.date_created),
             "date_modified": str(self.date_modified),
             "playtime": self.playtime(),
@@ -124,7 +122,7 @@ class Game:
     def remove_player(self, name):
         if name in self.players:
             p = self.players[name]
-            self.discard_deck.cards.extend(p.get_card_list())  # Return cards to discard pile
+            self.white_deck.discard(p.get_card_list())  # Return cards to discard pile
             self.players.pop(name, None)
 
     def playtime(self):
@@ -143,3 +141,6 @@ class Game:
         return Deck(json_data['whiteCards']), Deck(json_data['blackCards'])
 
 
+if __name__ == "__main__":
+    white, black = Game.load_cards("card_data/base.json")
+    print("got here")
