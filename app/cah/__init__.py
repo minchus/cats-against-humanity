@@ -68,3 +68,15 @@ def on_leave(data):
     g.remove_player(name=username)
     sio.leave_room(room_code)
     sio.send(g.serialize(), room=g.room_code)
+
+
+@socket_io_app.on('submit')
+def on_submit(data):
+    app.logger.info(data)
+    room_code = data['room']
+    username = data['username']
+    submission = data['submission']
+    g = RoomManager.get_game(room_code=room_code)
+    g.remove_player(name=username)
+    sio.leave_room(room_code)
+    sio.send(g.serialize(), room=g.room_code)

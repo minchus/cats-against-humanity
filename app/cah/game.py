@@ -92,10 +92,11 @@ class Game:
         self.dealer = ""
         self.date_created = datetime.now()
         self.date_modified = self.date_created
+        self.submissions = {}
 
         self.white_deck, self.black_deck = self.load_cards(join(APP_ROOT, "card_data", "base.json"))
-        # self.white_deck.shuffle()
-        # self.black_deck.shuffle()
+        self.white_deck.shuffle()
+        self.black_deck.shuffle()
         self.current_black_card = self.black_deck.draw(n=1)[0]
 
     def serialize(self):
