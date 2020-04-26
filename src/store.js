@@ -6,17 +6,17 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     connected: false,
-    game: {},
+    game: null,
     username: '',
     error: null,
     showJoin: true
   },
   getters: {
-    words (state) {
-      if (state.game.solution) {
-        return Object.keys(state.game.solution)
+    gameLoaded (state) {
+      if (state.game && state.username) {
+        return true
       }
-      return []
+      return false
     }
   },
   mutations: {
@@ -32,6 +32,10 @@ export default new Vuex.Store({
     },
     socket_error (state, message) {
       state.error = message.error
+    },
+    reset_error (state) {
+      state.error = null
+      state.game = null
     },
     set_game (state, game) {
       state.game = game

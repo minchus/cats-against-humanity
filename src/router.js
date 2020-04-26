@@ -19,7 +19,7 @@ export default new Router({
       component: Api
     },
     {
-      path: '/:room/:player',
+      path: '/:room/:username',
       name: 'Player',
       component: Player
     }

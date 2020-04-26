@@ -19,6 +19,7 @@
 </template>
 
 <script>
+import { mapMutations } from 'vuex'
 import JoinForm from '../components/JoinForm'
 import CreateForm from '../components/CreateForm'
 
@@ -30,8 +31,8 @@ export default {
     }
   },
   methods: {
+    ...mapMutations(['reset_error']),
     toggleIsJoin () {
-      console.log('got here')
       this.isJoin = !this.isJoin
     }
   },
@@ -43,6 +44,9 @@ export default {
   components: {
     JoinForm,
     CreateForm
+  },
+  mounted () {
+    this.reset_error()
   }
 }
 </script>

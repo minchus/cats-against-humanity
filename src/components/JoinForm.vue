@@ -48,12 +48,15 @@ export default {
     ...mapState(['error'])
   },
   methods: {
-    ...mapMutations(['set_username', 'set_room', 'toggle_show_join']),
+    ...mapMutations(['set_username', 'toggle_show_join']),
     joinGame () {
       this.$refs.form.validate()
       if (this.isValid) {
         this.set_username(this.username)
-        this.$socket.emit('join', { room: this.room, username: this.username })
+        this.$socket.emit('join', {
+          room: this.room,
+          username: this.username,
+          firstTime: true })
       }
     },
     toggleIsJoin () {
@@ -65,7 +68,7 @@ export default {
       console.log('game state received')
       this.$router.push({
         name: 'Player',
-        params: { room: data.room_code, player: this.username }
+        params: { room: data.room_code, username: this.username }
       })
     }
   }

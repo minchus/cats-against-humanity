@@ -51,7 +51,7 @@ export default {
       console.log('game state received')
       this.$router.push({
         name: 'Player',
-        params: { room: data.room_code, player: this.username }
+        params: { room: data.room_code, username: this.username }
       })
     }
   }
