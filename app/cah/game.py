@@ -6,9 +6,11 @@ from os.path import join, abspath, dirname
 import random
 import string
 import time
+import pprint
 
 APP_ROOT = abspath(join(dirname(__file__), ".."))
 
+pp = pprint.PrettyPrinter()
 
 class RoomManager:
     rooms = {}
@@ -57,7 +59,10 @@ class Player:
         self.name = name
         self.score = 0
         self.hand = dict.fromkeys(initial_cards)
-        self.selected_card = ""
+        self.submission = ""
+        self.submissionRevealed = False
+        self.hasSubmitted = False
+        self.submissionNumber = 0
 
     def serialize(self):
         return self.__dict__
@@ -92,7 +97,7 @@ class Game:
         self.dealer = ""
         self.date_created = datetime.now()
         self.date_modified = self.date_created
-        self.submissions = {}
+        self.submissionNumber = 0
 
         self.white_deck, self.black_deck = self.load_cards(join(APP_ROOT, "card_data", "base.json"))
         self.white_deck.shuffle()
@@ -100,7 +105,7 @@ class Game:
         self.current_black_card = self.black_deck.draw(n=1)[0]
 
     def serialize(self):
-        return {
+        ret = {
             "room_code": self.room_code,
             "players": {name: player.serialize() for name, player in self.players.items()},
             "dealer": self.dealer,
@@ -109,6 +114,8 @@ class Game:
             "date_modified": str(self.date_modified),
             "playtime": self.playtime(),
         }
+        pp.pprint(ret)
+        return ret
 
     class PlayerExistsError(Exception):
         pass
@@ -125,6 +132,29 @@ class Game:
             p = self.players[name]
             self.white_deck.discard(p.get_card_list())  # Return cards to discard pile
             self.players.pop(name, None)
+
+    class PlayerNotExistsError(Exception):
+        pass
+
+    class PlayerAlreadySubmittedError(Exception):
+        pass
+
+    def add_submission(self, player_name, submission):
+        if player_name not in self.players:
+            raise Game.PlayerNotExistsError
+        p = self.players[player_name]
+        if p.hasSubmitted:
+            raise Game.PlayerAlreadySubmittedError
+        p.submission = submission
+        p.hasSubmitted = True
+        p.submissionNumber = self.submissionNumber
+        self.submissionNumber += 1
+
+    def reveal_submission(self, player_name):
+        if player_name not in self.players:
+            raise Game.PlayerNotExistsError
+        p = self.players[player_name]
+        p.submissionRevealed = True
 
     def playtime(self):
         fmt = '%Y-%m-%d %H:%M:%S'  # 2018-08-12 10:12:25.700528

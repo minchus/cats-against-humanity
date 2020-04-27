@@ -3,7 +3,9 @@
     <v-alert type="error" :value="!!error" transition="slide-y-reverse-transition">
       {{ error }}
     </v-alert>
-    <game-board v-if="gameLoaded"></game-board>
+    <div v-if="gameLoaded">
+      <game-board></game-board>
+    </div>
   </v-container>
 </template>
 

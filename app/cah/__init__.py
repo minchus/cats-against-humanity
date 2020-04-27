@@ -14,17 +14,17 @@ cah_bp = Blueprint('cah', __name__,
 
 # @app.route('/stats')
 # def stats():
-#     """display room stats"""
+#     '''display room stats'''
 #     resp = {
-#         "total": len(ROOMS.keys()),
-#         "bytes_used": getsizeof(ROOMS)
+#         'total': len(ROOMS.keys()),
+#         'bytes_used': getsizeof(ROOMS)
 #     }
 #     if 'rooms' in request.args:
 #         if ROOMS:
-#             resp["rooms"] = sorted([ v.to_json() for v in ROOMS.values() ],
+#             resp['rooms'] = sorted([ v.to_json() for v in ROOMS.values() ],
 #                                    key=lambda k: k.get('date_modified'), reverse=True)
 #         else:
-#             resp["rooms"] = None
+#             resp['rooms'] = None
 #     return jsonify(resp)
 
 
@@ -32,7 +32,7 @@ cah_bp = Blueprint('cah', __name__,
 def on_create(data):
     app.logger.debug(data)
     g = RoomManager.create_game(first_player_name=data['username'])
-    app.logger.debug(f"Created game with room code {g.room_code}")
+    app.logger.debug(f'Created game with room code {g.room_code}')
     sio.join_room(g.room_code)
     sio.send(g.serialize(), room=g.room_code)
     RoomManager.prune()
@@ -49,13 +49,13 @@ def on_join(data):
         if first_time:
             g.add_player(name=username)
         sio.join_room(g.room_code)
-        app.logger.debug(f"User {username} joined {room_code}")
+        app.logger.debug(f'User {username} joined {room_code}')
         sio.send(g.serialize(), room=g.room_code)
     except RoomManager.NoRoomError:
-        app.logger.debug(f"User {username} tried to join {room_code} but room did not exist")
+        app.logger.debug(f'User {username} tried to join {room_code} but room did not exist')
         sio.emit('error', {'error': 'Room does not exist.'})
     except Game.PlayerExistsError:
-        app.logger.debug(f"User {username} tried to join {room_code} but user already exists")
+        app.logger.debug(f'User {username} tried to join {room_code} but user already exists')
         sio.emit('error', {'error': f'A player with name {username} already exists in room {room_code}.'})
 
 
@@ -76,7 +76,30 @@ def on_submit(data):
     room_code = data['room']
     username = data['username']
     submission = data['submission']
-    g = RoomManager.get_game(room_code=room_code)
-    g.remove_player(name=username)
-    sio.leave_room(room_code)
-    sio.send(g.serialize(), room=g.room_code)
+    try:
+        g = RoomManager.get_game(room_code=room_code)
+        g.add_submission(player_name=username, submission=submission)
+        sio.send(g.serialize(), room=g.room_code)
+    except RoomManager.NoRoomError:
+        app.logger.debug(f'User {username} tried to join {room_code} but room did not exist')
+        sio.emit('error', {'error': 'Room does not exist.'})
+    except Game.PlayerNotExistsError:
+        app.logger.debug(f'Submission received from non-existent user: {username}')
+        sio.emit('error', {'error': f'Submission received from non-existent user: {username}'})
+    except Game.PlayerAlreadySubmittedError:
+        app.logger.debug(f'Submission already received from user: {username}')
+        sio.emit('error', {'error': f'Submission already received from user: {username}'})
+
+
+@socket_io_app.on('reveal')
+def on_reveal(data):
+    app.logger.info(data)
+    room_code = data['room']
+    username = data['username']
+    try:
+        g = RoomManager.get_game(room_code=room_code)
+        g.reveal_submission(player_name=username)
+        sio.send(g.serialize(), room=g.room_code)
+    except Game.PlayerNotExistsError:
+        app.logger.debug(f'Player does not exist: {username}')
+        sio.emit('error', {'error': f'Player does not exist: {username}'})
