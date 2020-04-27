@@ -82,7 +82,7 @@ def on_submit(data):
         sio.send(g.serialize(), room=g.room_code)
     except RoomManager.NoRoomError:
         app.logger.debug(f'User {username} tried to join {room_code} but room did not exist')
-        sio.emit('error', {'error': 'Room does not exist.'})
+        sio.emit('error', {'error': f'Room {room_code} does not exist.'})
     except Game.PlayerNotExistsError:
         app.logger.debug(f'Submission received from non-existent user: {username}')
         sio.emit('error', {'error': f'Submission received from non-existent user: {username}'})
@@ -103,3 +103,24 @@ def on_reveal(data):
     except Game.PlayerNotExistsError:
         app.logger.debug(f'Player does not exist: {username}')
         sio.emit('error', {'error': f'Player does not exist: {username}'})
+
+
+@socket_io_app.on('vote')
+def on_vote(data):
+    app.logger.info(data)
+    room_code = data['room']
+    vote_for = data['voteFor']
+    voter = data['voter']
+    try:
+        g = RoomManager.get_game(room_code=room_code)
+        g.add_vote(voter=voter, vote_for=vote_for)
+        sio.send(g.serialize(), room=g.room_code)
+    except Game.PlayerNotExistsError:
+        app.logger.debug(f'Voter {voter} or votee {vote_for} does not exist')
+        sio.emit('error', {'error': f'Voter {voter} or votee {vote_for} does not exist'})
+    except Game.AlreadyVotedError:
+        app.logger.debug(f'Voter {voter} has already voted')
+        sio.emit('error', {'error': f'You have already voted'})
+    except RoomManager.NoRoomError:
+        app.logger.debug(f'Room {room_code} does not exist')
+        sio.emit('error', {'error': f'Room {room_code} does not exist.'})

@@ -1,27 +1,28 @@
 <template>
   <v-container>
+    Dealer: {{ dealer }}
 
     <v-row align="stretch" justify="start" wrap>
 
-      <v-col v-if="showMyCard" lg="2" md="3" sm="5" xs="12">
+      <v-col v-if="!submissionDone" lg="2" md="3" sm="5" xs="12">
         <v-card dark raised height="100%" min-height="100px">
           <v-card-text>
-              <div class="overline mb-4">My card<br>Votes: 0</div>
+              <div class="overline mb-4">My card (not submitted)</div>
               <span class="headline" v-html="blackCardHtml"></span>
           </v-card-text>
         </v-card>
       </v-col>
 
-      <v-col v-for="(sub, index) in submittedPlayers" :key="index" lg="2" md="3" sm="5" xs="12">
+      <v-col v-for="(player, index) in submittedPlayers" :key="index" lg="2" md="3" sm="5" xs="12">
         <v-card dark outlined class="card-outer" height="100%" min-height="100px">
           <v-card-text>
-              <div class="overline mb-4">{{ sub.name }}'s card<br>Votes: 0</div>
-              <span class="headline" v-html="submissionDisplay(sub)"></span>
+              <div class="overline mb-4">{{ player.name }}'s card<br>Votes: {{ player.votes }}</div>
+              <span class="headline" v-html="getSubmission(player)"></span>
           </v-card-text>
           <v-card-actions>
-            <v-btn text class="white--text" @click="onVote(index)">Vote</v-btn>
+            <v-btn v-if="submissionRevealed(player)" text class="white--text" @click="onVote(index)" :disabled="voteDisabled">Vote</v-btn>
             <v-spacer></v-spacer>
-            <v-btn v-if="isDealer" text class="white--text" @click="onReveal(index)">Reveal</v-btn>
+            <v-btn v-if="isDealer" text class="white--text" @click="onReveal(index)" :disabled="submissionRevealed(player)">Reveal</v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
@@ -33,7 +34,7 @@
         <v-card outlined hover height="100%" class="card-outer" @click="onSelect(card)">
           <v-card-text>
             <div class="text--primary">
-              {{ card }}
+              <span v-html="card"></span>
             </div>
           </v-card-text>
         </v-card>
@@ -41,6 +42,8 @@
     </v-row>
     <v-btn color="grey lighten-2" class="mt-4 mr-4 black--text" @click="onReset" :disabled="resetDisabled">Reset</v-btn>
     <v-btn color="grey darken-2" class="mt-4 white--text" @click="onSubmit" :disabled="submitDisabled">Submit</v-btn>
+    <div class="mt-3"><br></div>
+    <v-btn color="grey darken-2" class="mt-4 white--text" @click="onNextRound">Next Round</v-btn>
 
   </v-container>
 </template>
@@ -86,12 +89,21 @@ export default {
         username: this.submittedPlayers[index].name
       })
     },
-    submissionDisplay: function (player) {
-      let ret = '?'
-      if (player.submissionRevealed) {
-        ret = player.submission
+    onVote (index) {
+      this.$socket.emit('vote', {
+        room: this.room,
+        voteFor: this.submittedPlayers[index].name,
+        voter: this.username
+      })
+    },
+    getSubmission: function (player) {
+      if (player.name === this.username && !this.isDealer) {
+        return player.submission // Your own submission should always be revealed, unless you are the dealer
       }
-      return ret
+      return this.submissionRevealed(player) ? player.submission : '?'
+    },
+    submissionRevealed: function (player) {
+      return player.submissionRevealed
     }
   },
   computed: {
@@ -133,6 +145,9 @@ export default {
         return true
       }
       return false
+    },
+    voteDisabled: function () {
+      return this.players[this.username].hasVoted
     }
   },
   mounted () {

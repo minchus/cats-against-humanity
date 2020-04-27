@@ -57,11 +57,13 @@ class RoomManager:
 class Player:
     def __init__(self, name, initial_cards):
         self.name = name
-        self.score = 0
+        self.roundsWon = 0
         self.hand = dict.fromkeys(initial_cards)
         self.submission = ""
         self.submissionRevealed = False
         self.hasSubmitted = False
+        self.hasVoted = False
+        self.votes = 0
         self.submissionNumber = 0
 
     def serialize(self):
@@ -69,6 +71,9 @@ class Player:
 
     def get_card_list(self):
         return list(self.hand.keys())
+
+    def reset(self):
+        pass
 
 
 class Deck:
@@ -155,6 +160,18 @@ class Game:
             raise Game.PlayerNotExistsError
         p = self.players[player_name]
         p.submissionRevealed = True
+
+    class AlreadyVotedError(Exception):
+        pass
+
+    def add_vote(self, voter, vote_for):
+        if voter not in self.players or vote_for not in self.players:
+            raise Game.PlayerNotExistsError
+        p = self.players[voter]
+        if p.hasVoted:
+            raise Game.AlreadyVotedError
+        p.hasVoted = True
+        self.players[vote_for].votes += 1
 
     def playtime(self):
         fmt = '%Y-%m-%d %H:%M:%S'  # 2018-08-12 10:12:25.700528
