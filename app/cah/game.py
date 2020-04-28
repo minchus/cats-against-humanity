@@ -12,6 +12,7 @@ APP_ROOT = abspath(join(dirname(__file__), ".."))
 
 pp = pprint.PrettyPrinter()
 
+
 class RoomManager:
     rooms = {}
 
@@ -62,9 +63,9 @@ class Player:
         self.submission = ""
         self.submissionRevealed = False
         self.hasSubmitted = False
-        self.hasVoted = False
-        self.votes = 0
         self.submissionNumber = 0
+        self.isWinner = False
+        self.submittedCards = []
 
     def serialize(self):
         return self.__dict__
@@ -72,16 +73,35 @@ class Player:
     def get_card_list(self):
         return list(self.hand.keys())
 
-    def reset(self):
-        pass
+    def end_round(self, deck):
+        if self.hasSubmitted:
+            for card in self.submittedCards:
+                self.hand.pop(card)
+            self.hand.update(
+                dict.fromkeys(
+                    deck.draw(len(self.submittedCards))))
+            deck.discard(self.submittedCards)
+        self.submittedCards = []
+        self.submission = ""
+        self.submissionRevealed = False
+        self.hasSubmitted = False
+        self.submissionNumber = 0
+        self.isWinner = False
 
 
 class Deck:
-    def __init__(self, card_list=[]):
+    def __init__(self, card_list=None):
+        if card_list is None:
+            card_list = []
         self.cards = card_list
         self.discarded = []
 
     def draw(self, n):
+        if n > len(self.cards):
+            self.cards.extend(self.discarded)
+            self.discarded = []
+            self.shuffle()
+
         if 1 <= n <= len(self.cards):
             ret = self.cards[-n:]
             del self.cards[-n:]
@@ -103,6 +123,8 @@ class Game:
         self.date_created = datetime.now()
         self.date_modified = self.date_created
         self.submissionNumber = 0
+        self.round_won = False
+        self.rounds_played = 0
 
         self.white_deck, self.black_deck = self.load_cards(join(APP_ROOT, "card_data", "base.json"))
         self.white_deck.shuffle()
@@ -118,6 +140,7 @@ class Game:
             "date_created": str(self.date_created),
             "date_modified": str(self.date_modified),
             "playtime": self.playtime(),
+            "rounds_played": self.rounds_played
         }
         pp.pprint(ret)
         return ret
@@ -144,13 +167,14 @@ class Game:
     class PlayerAlreadySubmittedError(Exception):
         pass
 
-    def add_submission(self, player_name, submission):
+    def add_submission(self, player_name, submission, submitted_cards):
         if player_name not in self.players:
             raise Game.PlayerNotExistsError
         p = self.players[player_name]
         if p.hasSubmitted:
             raise Game.PlayerAlreadySubmittedError
         p.submission = submission
+        p.submittedCards = submitted_cards
         p.hasSubmitted = True
         p.submissionNumber = self.submissionNumber
         self.submissionNumber += 1
@@ -161,17 +185,33 @@ class Game:
         p = self.players[player_name]
         p.submissionRevealed = True
 
-    class AlreadyVotedError(Exception):
+    class AlreadyWonError(Exception):
         pass
 
-    def add_vote(self, voter, vote_for):
-        if voter not in self.players or vote_for not in self.players:
+    def winner_selected(self, name):
+        if name not in self.players:
             raise Game.PlayerNotExistsError
-        p = self.players[voter]
-        if p.hasVoted:
-            raise Game.AlreadyVotedError
-        p.hasVoted = True
-        self.players[vote_for].votes += 1
+        if self.round_won:
+            raise Game.AlreadyWonError
+        p = self.players[name]
+        p.isWinner = True
+        p.roundsWon += 1
+        self.round_won = True
+
+    def next_round(self):
+        self.round_won = False
+        self.submissionNumber = 0
+        self.rounds_played += 1
+
+        for name, player in self.players.items():
+            player.end_round(self.white_deck)
+        self.black_deck.discard(self.current_black_card)
+        self.current_black_card = self.black_deck.draw(1)[0]
+
+        if len(self.players) > 1:
+            names = list(self.players.keys())
+            names.remove(self.dealer)
+            self.dealer = random.choice(names)
 
     def playtime(self):
         fmt = '%Y-%m-%d %H:%M:%S'  # 2018-08-12 10:12:25.700528

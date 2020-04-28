@@ -38,7 +38,7 @@
         transition="scale-transition"
         width="45"
       />
-      <v-toolbar-title>Cats Against Humanity</v-toolbar-title>
+      <v-toolbar-title class="ml-1">Cats Against Humanity</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
     </v-app-bar>
@@ -51,7 +51,6 @@
       color="grey darken-4"
       app
     >
-      <span class="white--text">&copy; 2019</span>
     </v-footer>
 
   </v-app>

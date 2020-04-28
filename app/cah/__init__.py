@@ -76,9 +76,10 @@ def on_submit(data):
     room_code = data['room']
     username = data['username']
     submission = data['submission']
+    submitted_cards = data['submittedCards']
     try:
         g = RoomManager.get_game(room_code=room_code)
-        g.add_submission(player_name=username, submission=submission)
+        g.add_submission(player_name=username, submission=submission, submitted_cards=submitted_cards)
         sio.send(g.serialize(), room=g.room_code)
     except RoomManager.NoRoomError:
         app.logger.debug(f'User {username} tried to join {room_code} but room did not exist')
@@ -105,22 +106,35 @@ def on_reveal(data):
         sio.emit('error', {'error': f'Player does not exist: {username}'})
 
 
-@socket_io_app.on('vote')
-def on_vote(data):
+@socket_io_app.on('pick')
+def on_pick(data):
     app.logger.info(data)
     room_code = data['room']
-    vote_for = data['voteFor']
-    voter = data['voter']
+    winner_name = data['pick']
     try:
         g = RoomManager.get_game(room_code=room_code)
-        g.add_vote(voter=voter, vote_for=vote_for)
+        g.winner_selected(name=winner_name)
         sio.send(g.serialize(), room=g.room_code)
     except Game.PlayerNotExistsError:
-        app.logger.debug(f'Voter {voter} or votee {vote_for} does not exist')
-        sio.emit('error', {'error': f'Voter {voter} or votee {vote_for} does not exist'})
-    except Game.AlreadyVotedError:
-        app.logger.debug(f'Voter {voter} has already voted')
-        sio.emit('error', {'error': f'You have already voted'})
+        app.logger.debug(f'Player {winner_name} does not exist')
+        sio.emit('error', {'error': f'Player {winner_name} does not exist'})
+    except Game.AlreadyWonError:
+        app.logger.debug(f'The round has already ended')
+        sio.emit('error', {'error': f'The round has already ended'})
+    except RoomManager.NoRoomError:
+        app.logger.debug(f'Room {room_code} does not exist')
+        sio.emit('error', {'error': f'Room {room_code} does not exist.'})
+
+
+@socket_io_app.on('next')
+def on_next(data):
+    app.logger.info(data)
+    room_code = data['room']
+    try:
+        g = RoomManager.get_game(room_code=room_code)
+        g.next_round()
+        sio.send(g.serialize(), room=g.room_code)
+        sio.emit('reset')
     except RoomManager.NoRoomError:
         app.logger.debug(f'Room {room_code} does not exist')
         sio.emit('error', {'error': f'Room {room_code} does not exist.'})
