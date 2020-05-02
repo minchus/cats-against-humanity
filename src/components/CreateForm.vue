@@ -48,7 +48,6 @@ export default {
   },
   sockets: {
     message: function (data) {
-      console.log('game state received')
       this.$router.push({
         name: 'Player',
         params: { room: data.room_code, username: this.username }
