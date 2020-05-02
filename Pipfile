@@ -8,7 +8,7 @@ eventlet = "*"
 flask = "*"
 flask-restplus = "*"
 flask_socketio = "*"
-gunicorn = "==19.7.1"
+gunicorn = "*"
 python-dotenv = "*"
 
 [dev-packages]
@@ -18,4 +18,4 @@ pytest-sugar = "*"
 pytest-cov = "*"
 
 [requires]
-python_version = "3.6"
+python_version = "3.7"

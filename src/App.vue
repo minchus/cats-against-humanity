@@ -34,7 +34,7 @@
         alt="Cat Logo"
         class="shrink mr-2"
         contain
-        src="@/assets/white-cat-icon.svg"
+        src="./assets/white-cat-icon.svg"
         transition="scale-transition"
         width="45"
       />
