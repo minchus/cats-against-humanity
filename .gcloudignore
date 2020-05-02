@@ -7,20 +7,16 @@
 #   $ gcloud topic gcloudignore
 #
 .gcloudignore
-# If you would like to upload your .git directory, .gitignore file or files
-# from your .gitignore file, remove the corresponding line
-# below:
 .git
 .gitignore
+.venv
+.idea
+.vscode
 
 # Python pycache:
 __pycache__/
 # Ignored by the build system
 /setup.cfg
-
-.venv/
-.idea/
-.vscode/
 
 # App specific:
 *~
@@ -28,14 +24,10 @@ __pycache__/
 *.pyo
 *.vue
 node_modules/
-LICENSE
-package.json
-README.md
-!app/
-app/*
-!app/dist/
 docs/
 src/
 tests/
+package.json
+README.md
 Pipfile
 Pipfile.lock

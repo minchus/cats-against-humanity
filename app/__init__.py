@@ -5,7 +5,7 @@ import os
 
 
 app = Flask(__name__, static_folder='../dist/static')
-socket_io_app = SocketIO(app, cors_allowed_origins='http://localhost:8080')
+socket_io_app = SocketIO(app, cors_allowed_origins='*')
 
 
 # from .api import api_bp
