@@ -27,16 +27,16 @@
       <router-link to="/" title="home">
       <v-img
         alt="Cat Logo"
-        class="shrink mr-2"
+        class="shrink"
         contain
-        src="./assets/white-cat-icon.svg"
+        src="./assets/cat-white.svg"
         transition="scale-transition"
-        width="40"
+        width="50"
       />
       </router-link>
 
       <router-link to="/" title="Home" style="text-decoration:none;">
-        <v-toolbar-title class="headline ml-1 white--text">Cats Against Humanity</v-toolbar-title>
+        <v-toolbar-title class="headline ml-3 white--text">Cats Against Humanity</v-toolbar-title>
       </router-link>
 
       <v-spacer></v-spacer>

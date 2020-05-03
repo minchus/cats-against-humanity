@@ -210,8 +210,7 @@ class Game:
 
         if len(self.players) > 1:
             names = list(self.players.keys())
-            names.remove(self.dealer)
-            self.dealer = random.choice(names)
+            self.dealer = names[(names.index(self.dealer) + 1) % len(names)]
 
     def playtime(self):
         fmt = '%Y-%m-%d %H:%M:%S'  # 2018-08-12 10:12:25.700528
