@@ -3,6 +3,7 @@ import flask_socketio as sio
 
 from app import socket_io_app, app
 from app.cah.game import RoomManager, Game
+from app.cah.card_data import Deck
 
 cah_bp = Blueprint('cah', __name__,
                    url_prefix='',
@@ -28,10 +29,18 @@ cah_bp = Blueprint('cah', __name__,
 #     return jsonify(resp)
 
 
+@socket_io_app.on('list_decks')
+def on_list_decks():
+    app.logger.debug("")
+    deck_list = Game.CARD_DATA.get_deck_list()
+    sio.emit('list_decks', {'deck_list': deck_list})
+    RoomManager.prune()
+
+
 @socket_io_app.on('create')
 def on_create(data):
     app.logger.debug(data)
-    g = RoomManager.create_game(first_player_name=data['username'])
+    g = RoomManager.create_game(first_player_name=data['username'], deck_code_list=data['decks'])
     app.logger.debug(f'Created game with room code {g.room_code}')
     sio.join_room(g.room_code)
     sio.send(g.serialize(), room=g.room_code)
@@ -57,6 +66,9 @@ def on_join(data):
     except Game.PlayerExistsError:
         app.logger.debug(f'User {username} tried to join {room_code} but user already exists')
         sio.emit('error', {'error': f'A player with name {username} already exists in room {room_code}.'})
+    except Deck.InsufficientCardsError:
+        app.logger.debug(f'Insufficient cards in game another player')
+        sio.emit('error', {'error': f'Insufficient cards in game for another player.'})
 
 
 @socket_io_app.on('leave')

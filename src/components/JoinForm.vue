@@ -46,10 +46,10 @@ export default {
     }
   },
   computed: {
-    ...mapState(['error'])
+    ...mapState(['error', 'deck_list'])
   },
   methods: {
-    ...mapMutations(['set_username', 'toggle_show_join']),
+    ...mapMutations(['set_username', 'toggle_show_join', 'set_error']),
     joinGame () {
       this.$refs.form.validate()
       if (this.isValid) {
@@ -61,6 +61,10 @@ export default {
       }
     },
     toggleIsJoin () {
+      if (!this.deck_list) {
+        this.set_error('Deck list not received')
+        return
+      }
       this.toggle_show_join()
     },
     uppercase () {

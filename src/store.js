@@ -7,6 +7,7 @@ export default new Vuex.Store({
   state: {
     connected: false,
     game: null,
+    deck_list: null,
     username: '',
     error: null,
     showJoin: true
@@ -30,8 +31,14 @@ export default new Vuex.Store({
       state.game = message
       state.error = null
     },
+    socket_list_decks (state, message) {
+      state.deck_list = message.deck_list
+    },
     socket_error (state, message) {
       state.error = message.error
+    },
+    set_error (state, message) {
+      state.error = message
     },
     reset_error (state) {
       state.error = null

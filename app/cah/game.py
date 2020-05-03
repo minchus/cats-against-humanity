@@ -1,16 +1,12 @@
 from datetime import datetime
 import flask_socketio as sio
-import json
 import gc
-from os.path import join, abspath, dirname
+import os
 import random
 import string
 import time
-import pprint
 
-APP_ROOT = abspath(join(dirname(__file__), ".."))
-
-pp = pprint.PrettyPrinter()
+from app.cah.card_data import CardData
 
 
 class RoomManager:
@@ -32,9 +28,9 @@ class RoomManager:
             string.ascii_uppercase) for _ in range(id_length))
 
     @classmethod
-    def create_game(cls, first_player_name):
+    def create_game(cls, first_player_name, deck_code_list):
         room_code = cls.generate_room_code()
-        g = Game(room_code)
+        g = Game(room_code=room_code, deck_code_list=deck_code_list)
         g.dealer = first_player_name
         g.add_player(first_player_name)
         cls.rooms[room_code] = g
@@ -89,34 +85,11 @@ class Player:
         self.isWinner = False
 
 
-class Deck:
-    def __init__(self, card_list=None):
-        if card_list is None:
-            card_list = []
-        self.cards = card_list
-        self.discarded = []
-
-    def draw(self, n):
-        if n > len(self.cards):
-            self.cards.extend(self.discarded)
-            self.discarded = []
-            self.shuffle()
-
-        if 1 <= n <= len(self.cards):
-            ret = self.cards[-n:]
-            del self.cards[-n:]
-            return ret
-        return []
-
-    def shuffle(self):
-        random.shuffle(self.cards)
-
-    def discard(self, card_list):
-        self.discarded.extend(card_list)
-
-
 class Game:
-    def __init__(self, room_code):
+    app_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    CARD_DATA = CardData(path=os.path.join(app_root, "card_data", "official.json"))
+
+    def __init__(self, room_code, deck_code_list):
         self.room_code = room_code
         self.players = {}  # player_name: Player()
         self.dealer = ""
@@ -126,9 +99,9 @@ class Game:
         self.round_won = False
         self.rounds_played = 0
 
-        self.white_deck, self.black_deck = self.load_cards(join(APP_ROOT, "card_data", "base.json"))
-        self.white_deck.shuffle()
+        self.black_deck, self.white_deck = Game.CARD_DATA.get_decks(deck_code_list)
         self.black_deck.shuffle()
+        self.white_deck.shuffle()
         self.current_black_card = self.black_deck.draw(n=1)[0]
 
     def serialize(self):
@@ -142,7 +115,6 @@ class Game:
             "playtime": self.playtime(),
             "rounds_played": self.rounds_played
         }
-        pp.pprint(ret)
         return ret
 
     class PlayerExistsError(Exception):
@@ -221,13 +193,3 @@ class Game:
         d2_ts = time.mktime(d2.timetuple())
         return round(float(d2_ts-d1_ts) / 60, 2)
 
-    @staticmethod
-    def load_cards(path):
-        with open(path, 'r') as f:
-            json_data = json.load(f)
-        return Deck(json_data['whiteCards']), Deck(json_data['blackCards'])
-
-
-if __name__ == "__main__":
-    white, black = Game.load_cards("card_data/base.json")
-    print("got here")

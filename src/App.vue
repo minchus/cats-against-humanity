@@ -62,6 +62,10 @@ export default {
 
   data: () => ({
     drawer: false
-  })
+  }),
+
+  mounted () {
+    this.$socket.emit('list_decks')
+  }
 }
 </script>
