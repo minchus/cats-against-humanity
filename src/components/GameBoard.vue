@@ -52,11 +52,13 @@
       color="grey darken-4"
       app
     >
-    <span class="white--text">Dealer: {{ dealer }}</span>
-    <v-divider inset vertical color="white" class="ml-5 mr-5"></v-divider>
-    <span class="white--text">{{ numSubmitted }} / {{ numPlayers }} players have submitted</span>
-    <v-divider inset vertical color="white" class="ml-5 mr-5"></v-divider>
-    <span class="white--text">{{ this.roundsPlayed }} rounds played</span>
+    <span class="body-2 white--text">Room: {{ room }}</span>
+    <v-divider inset vertical color="white" class="my-3 mx-2"></v-divider>
+    <span class="body-2 white--text">Dealer: {{ dealer }}</span>
+    <v-divider inset vertical color="white" class="my-3 mx-2"></v-divider>
+    <span class="body-2 white--text">{{ numSubmitted }} / {{ numPlayers }} submitted</span>
+    <v-divider inset vertical color="white" class="my-3 mx-2"></v-divider>
+    <span class="body-2 white--text">{{ this.roundsPlayed }} rounds played</span>
     <v-spacer></v-spacer>
 
     <div class="text-center">

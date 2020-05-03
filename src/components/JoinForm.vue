@@ -18,6 +18,7 @@
           type="text"
           v-model="room"
           :rules="[rules.required]"
+          @keyup="uppercase"
         ></v-text-field>
       </v-form>
     </v-card-text>
@@ -61,6 +62,9 @@ export default {
     },
     toggleIsJoin () {
       this.toggle_show_join()
+    },
+    uppercase () {
+      this.room = this.room.toUpperCase()
     }
   },
   sockets: {

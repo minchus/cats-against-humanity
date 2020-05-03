@@ -1,7 +1,7 @@
 <template>
   <v-card class="elevation-12">
     <v-card-text>
-      <v-form ref='form' v-model='isValid'>
+      <v-form ref='form' v-model='isValid' v-on:submit.prevent="onSubmit">
         <v-text-field
           label="Player name"
           name="username"
