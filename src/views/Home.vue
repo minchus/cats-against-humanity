@@ -3,7 +3,7 @@
     <span class="title">An online version of Cards Against Humanity&trade;</span>
     <v-row align="start" justify="center">
       <v-col lg="5" md="6" sm="7" cols="12">
-        <v-card class="mt-10 text-xs-left">
+        <v-card class="mt-8 text-xs-left">
           <v-toolbar
             color="grey darken-2"
             dark
