@@ -134,7 +134,7 @@ def on_next(data):
         g = RoomManager.get_game(room_code=room_code)
         g.next_round()
         sio.send(g.serialize(), room=g.room_code)
-        sio.emit('reset', room=g.room_code)
+        sio.emit('next', room=g.room_code)
     except RoomManager.NoRoomError:
         app.logger.debug(f'Room {room_code} does not exist')
         sio.emit('error', {'error': f'Room {room_code} does not exist.'})

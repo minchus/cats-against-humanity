@@ -58,7 +58,7 @@
     <v-divider inset vertical color="white" class="my-3 mx-2"></v-divider>
     <span class="body-2 white--text">{{ numSubmitted }} / {{ numPlayers }} submitted</span>
     <v-divider inset vertical color="white" class="my-3 mx-2"></v-divider>
-    <span class="body-2 white--text">{{ this.roundsPlayed }} rounds played</span>
+    <span class="body-2 white--text">Round: {{ this.roundsPlayed + 1 }}</span>
     <v-spacer></v-spacer>
 
     <div class="text-center">
@@ -98,8 +98,16 @@
       </v-dialog>
     </div>
 
-    <v-btn color="grey darken-2" class="mt-2 mb-2 white--text" @click="onNextRound">Next Round</v-btn>
+    <v-btn color="grey darken-2" class="mt-2 mb-2 white--text" @click="onNextRound">Skip Round</v-btn>
     </v-footer>
+
+    <v-snackbar v-if="isDealer" absolute v-model="dealerSnackbar" >You are the dealer for this round
+      <v-btn color="pink" text @click="dealerSnackbar = false">Close</v-btn>
+    </v-snackbar>
+
+    <v-snackbar absolute v-model="roundWinner" :timeout="0">{{ roundWinner }} won this round!
+      <v-btn color="pink" text @click="onNextRound">Next round</v-btn>
+    </v-snackbar>
 
   </v-container>
 </template>
@@ -115,13 +123,16 @@ export default {
       selectionIndex: 0,
       room: '',
       cardsToSubmit: [],
-      dialog: false
+      dialog: false,
+      dealerSnackbar: false,
+      roundEndSnackbar: false
     }
   },
   methods: {
     ...mapMutations(['set_username']),
     formatBlackCard () {
       let ret = this.blackCardText
+
       this.cardsToSubmit.forEach(function (cardText, index) {
         // Strip the trailing period on card text
         if (cardText.slice(-1) === '.') {
@@ -174,7 +185,7 @@ export default {
       if (player.name === this.username && !this.isDealer) {
         return player.submission // Your own submission should always be revealed, unless you are the dealer
       }
-      return this.submissionRevealed(player) ? player.submission : 'Not revealed'
+      return this.submissionRevealed(player) ? player.submission : '[ Waiting for dealer to reveal ]'
     },
     submissionRevealed: function (player) {
       return player.submissionRevealed
@@ -183,6 +194,7 @@ export default {
       return player.isWinner
     },
     onNextRound: function () {
+      this.roundEndSnackbar = false
       this.$socket.emit('next', {
         room: this.room
       })
@@ -255,12 +267,26 @@ export default {
     pickDisabled: function () {
       /* eslint-disable no-unused-vars */
       for (let [playerName, playerObj] of Object.entries(this.players)) {
-        if (playerObj.submissionRevealed === false || playerObj.isWinner === true) {
+        if ((playerObj.submissionRevealed === false && playerObj.hasSubmitted) || playerObj.isWinner === true) {
           return true
         }
       }
       /* eslint-enable no-unused-vars */
       return false
+    },
+    roundWinner: {
+      get: function () {
+        /* eslint-disable no-unused-vars */
+        for (let [playerName, playerObj] of Object.entries(this.players)) {
+          if (playerObj.isWinner === true) {
+            return playerObj.name
+          }
+        }
+        /* eslint-enable no-unused-vars */
+        return null
+      },
+      set: function () {
+      }
     }
   },
   mounted () {
@@ -268,9 +294,9 @@ export default {
     if (!this.room) this.room = this.$route.params.room
   },
   sockets: {
-    reset: function () {
-      console.log('reset received')
+    next: function () {
       this.onReset()
+      this.dealerSnackbar = true
     }
   }
 }
