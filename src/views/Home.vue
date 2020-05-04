@@ -28,14 +28,10 @@ export default {
   name: 'Home',
   data () {
     return {
-      isJoin: true
     }
   },
   methods: {
-    ...mapMutations(['reset_error']),
-    toggleIsJoin () {
-      this.isJoin = !this.isJoin
-    }
+    ...mapMutations(['reset_error', 'set_join'])
   },
   computed: {
     showJoin () {
@@ -47,6 +43,7 @@ export default {
     CreateForm
   },
   mounted () {
+    this.set_join(true)
     this.reset_error()
   }
 }

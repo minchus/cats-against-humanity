@@ -50,6 +50,9 @@ export default new Vuex.Store({
     set_username (state, username) {
       state.username = username
     },
+    set_join (state, joinValue) {
+      state.showJoin = joinValue
+    },
     toggle_show_join (state) {
       state.showJoin = !state.showJoin
       state.error = null

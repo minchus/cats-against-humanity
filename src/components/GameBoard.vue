@@ -3,7 +3,8 @@
 
     <v-row align="stretch" justify="start" wrap>
 
-      <v-col v-if="!submissionDone" lg="3" md="3" sm="4" cols="6">
+      <!-- My card -->
+      <v-col v-if="!submissionDone" xl="2" lg="3" md="3" sm="4" cols="6">
         <v-card dark raised class="flexcard" height="100%">
           <v-card-text class="grow">
               <div class="overline mb-4">My card<br>(Not submitted)</div>
@@ -17,7 +18,8 @@
         </v-card>
       </v-col>
 
-      <v-col v-for="(player, index) in submittedPlayers" :key="index" lg="3" md="3" sm="4" cols="6">
+      <!-- Submitted cards -->
+      <v-col v-for="(player, index) in submittedPlayers" :key="index" xl="2" lg="3" md="3" sm="4" cols="6">
         <v-card :dark="!isWinner(player)" raised class="flexcard" height="100%">
           <v-card-text class="grow">
               <div v-if="isWinner(player)" class="overline mb-4">{{ player.name }}'s card wins</div>
@@ -34,8 +36,9 @@
 
     </v-row>
 
+    <!-- My hand-->
     <v-row align="stretch" justify="start" wrap class="mt-10">
-      <v-col v-for="card in availableHand" :key="card" lg="3" md="3" sm="4" cols="6">
+      <v-col v-for="card in availableHand" :key="card" xl="2" lg="3" md="3" sm="4" cols="6">
         <v-card outlined hover height="100%" class="card-outer" @click="onSelect(card)" :disabled="submissionDone">
           <v-card-text>
             <div class="text--primary">
