@@ -40,11 +40,15 @@ def on_list_decks():
 @socket_io_app.on('create')
 def on_create(data):
     app.logger.debug(data)
-    g = RoomManager.create_game(first_player_name=data['username'], deck_code_list=data['decks'])
-    app.logger.debug(f'Created game with room code {g.room_code}')
-    sio.join_room(g.room_code)
-    sio.send(g.serialize(), room=g.room_code)
-    RoomManager.prune()
+    try:
+        g = RoomManager.create_game(first_player_name=data['username'], deck_code_list=data['decks'])
+        app.logger.debug(f'Created game with room code {g.room_code}')
+        sio.join_room(g.room_code)
+        sio.send(g.serialize(), room=g.room_code)
+        RoomManager.prune()
+    except Deck.InsufficientCardsError:
+        app.logger.debug(f'Insufficient cards in game')
+        sio.emit('error', {'error': f'Insufficient cards in game.'})
 
 
 @socket_io_app.on('join')
