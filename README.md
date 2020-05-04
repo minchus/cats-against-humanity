@@ -1,13 +1,6 @@
 # Cats Against Humanity 🙀 
 
-_Cards against humanity web app (with added cat)_
-
-
-## Template Structure
-
-The template uses Flask & Flask-RestPlus to create a minimal REST style API,
-and let's VueJs + vue-cli handle the front end and asset pipline.
-Data from the python server to the Vue application is passed by making Ajax requests.
+_Cards against humanity online (and with added cat)_
 
 ### Application Structure
 
@@ -15,6 +8,10 @@ Data from the python server to the Vue application is passed by making Ajax requ
 
 The Api is served using a Flask blueprint at `/api/` using Flask RestPlus class-based
 resource routing.
+
+#### Websockets
+
+Websockets are used to enable the real time behaviour of the game. The server uses flask-socketio and the client uses vue-socketio.
 
 #### Client Application
 
