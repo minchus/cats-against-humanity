@@ -7,7 +7,7 @@
       <v-col v-if="!submissionDone" xl="2" lg="3" md="3" sm="4" cols="6">
         <v-card dark raised class="flexcard" height="100%">
           <v-card-text class="grow">
-              <div class="overline mb-4">My card<br>(Not submitted)</div>
+              <div class="overline mb-4">My card<br>Pick {{ pickCount }} then submit</div>
               <span class="card-text" v-html="blackCardHtml"></span>
           </v-card-text>
           <v-card-actions class="card-actions">
@@ -104,11 +104,11 @@
     <v-btn color="grey darken-2" class="mt-2 mb-2 white--text" @click="onNextRound">Skip Round</v-btn>
     </v-footer>
 
-    <v-snackbar v-if="isDealer" absolute v-model="dealerSnackbar" >You are the dealer for this round
+    <v-snackbar v-if="isDealer" top absolute multi-line v-model="dealerSnackbar" >You are the dealer.<br>After everyone has played, reveal each card and pick a winner.
       <v-btn color="pink" text @click="dealerSnackbar = false">Close</v-btn>
     </v-snackbar>
 
-    <v-snackbar absolute v-model="roundWinner" :timeout="0">{{ roundWinner }} won this round!
+    <v-snackbar top absolute v-model="roundWinner" :timeout="0">{{ roundWinner }} won this round!
       <v-btn color="pink" text @click="onNextRound">Next round</v-btn>
     </v-snackbar>
 
