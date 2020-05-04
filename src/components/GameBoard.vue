@@ -5,9 +5,11 @@
 
       <!-- My card -->
       <v-col v-if="!submissionDone" xl="2" lg="3" md="3" sm="4" cols="6">
-        <v-card dark raised class="flexcard" height="100%">
+        <v-card dark raised class="flexcard" height="100%" color="pink darken-2">
           <v-card-text class="grow">
-              <div class="overline mb-4">My card<br>Pick {{ pickCount }} then submit</div>
+              <div class="overline mb-4">
+                My card<br>{{ numCardsNeeded === 0 ? 'Ready to submit' : 'Pick ' + numCardsNeeded + ' more'}}
+              </div>
               <span class="card-text" v-html="blackCardHtml"></span>
           </v-card-text>
           <v-card-actions class="card-actions">
@@ -23,11 +25,11 @@
         <v-card :dark="!isWinner(player)" raised class="flexcard" height="100%">
           <v-card-text class="grow">
               <div v-if="isWinner(player)" class="overline mb-4">{{ player.name }}'s card wins</div>
-              <div v-if="!isWinner(player)" class="overline mb-4">{{ player.name === username ? 'My card' : '' }}</div>
+              <div v-else class="overline mb-4">Votes: {{ player.votes }} {{ player.name === username ? '(My card)' : '' }}</div>
               <span class="card-text" v-html="getSubmission(player)"></span>
           </v-card-text>
           <v-card-actions>
-            <v-btn v-if="isDealer" text class="white--text" @click="onPick(player)" :disabled="pickDisabled">Pick</v-btn>
+            <v-btn text class="white--text" @click="onVote(player)" :disabled="voteDisabled">Vote</v-btn>
             <v-spacer></v-spacer>
             <v-btn v-if="isDealer" text class="white--text" @click="onReveal(index)" :disabled="submissionRevealed(player)">Reveal</v-btn>
           </v-card-actions>
@@ -57,18 +59,19 @@
     >
     <span class="body-2 white--text">Room: {{ room }}</span>
     <v-divider inset vertical color="white" class="my-3 mx-2"></v-divider>
-    <span class="body-2 white--text">Dealer: {{ dealer }}</span>
-    <v-divider inset vertical color="white" class="my-3 mx-2"></v-divider>
-    <span class="body-2 white--text">{{ numSubmitted }} / {{ numPlayers }} submitted</span>
-    <v-divider inset vertical color="white" class="my-3 mx-2"></v-divider>
     <span class="body-2 white--text">Round: {{ this.roundsPlayed + 1 }}</span>
+    <v-divider inset vertical color="white" class="my-3 mx-2"></v-divider>
+    <span class="body-2 white--text">Dealer: {{ dealer }}</span>
     <v-spacer></v-spacer>
+    <span class="body-2 white--text">{{ numSubmitted }} / {{ numPlayers }} played</span>
+    <v-divider inset vertical color="white" class="my-3 mx-2"></v-divider>
+    <span class="body-2 white--text">{{ numVoted}} / {{ numPlayers }} voted</span>
 
     <div class="text-center">
       <v-dialog v-model="dialog" width="500" >
 
         <template v-slot:activator="{ on }">
-          <v-btn color="grey darken-2" class="mt-2 mb-2 mr-3 white--text" v-on="on">Show scores</v-btn>
+          <v-btn color="grey darken-2" class="mt-2 mb-2 mr-3 ml-3 white--text" v-on="on">Show scores</v-btn>
         </template>
 
         <v-card>
@@ -101,15 +104,28 @@
       </v-dialog>
     </div>
 
-    <v-btn color="grey darken-2" class="mt-2 mb-2 white--text" @click="onNextRound">Skip Round</v-btn>
+    <v-btn color="grey darken-2" class="mt-2 mb-2 white--text" @click="onEndRound(false)">End Round</v-btn>
     </v-footer>
 
-    <v-snackbar v-if="isDealer" top absolute multi-line v-model="dealerSnackbar" >You are the dealer.<br>After everyone has played, reveal each card and pick a winner.
-      <v-btn color="pink" text @click="dealerSnackbar = false">Close</v-btn>
+    <v-snackbar v-if="isDealer" top v-model="dealerSnackbar" :timeout="0" color="blue">
+      You are the dealer
+      <v-btn color="white" text @click="dealerSnackbar = false">Close</v-btn>
     </v-snackbar>
 
-    <v-snackbar top absolute v-model="roundWinner" :timeout="0">{{ roundWinner }} won this round!
-      <v-btn color="pink" text @click="onNextRound">Next round</v-btn>
+    <v-snackbar top v-model="roundEnded" :timeout="0" color="blue">{{ roundEndMessage }}
+      <v-btn color="white" text @click="onNextRound">Next round</v-btn>
+    </v-snackbar>
+
+    <v-snackbar top v-model="roundEndWarningSnackbar" multi-line :timeout="2000" color="blue">Only the dealer should end the round.<br>Click here if you really want to end the round.
+      <v-btn color="white" text @click="onEndRound(true)">End round</v-btn>
+    </v-snackbar>
+
+    <v-snackbar top v-model="allSubmittedSnackbar" :timeout="5000" color="blue">Everyone has played. Reveal each card.
+      <v-btn color="white" text @click="allSubmittedSnackbar = false">Close</v-btn>
+    </v-snackbar>
+
+    <v-snackbar top v-model="allVotedSnackbar" :timeout="0" color="blue">Everyone has voted. End the round to reveal the winner.
+      <v-btn color="white" text @click="onEndRound">End round</v-btn>
     </v-snackbar>
 
   </v-container>
@@ -128,7 +144,9 @@ export default {
       cardsToSubmit: [],
       dialog: false,
       dealerSnackbar: false,
-      roundEndSnackbar: false
+      roundEndWarningSnackbar: false,
+      allVotedSnackbar: false,
+      allSubmittedSnackbar: false
     }
   },
   methods: {
@@ -178,16 +196,14 @@ export default {
         username: this.submittedPlayers[index].name
       })
     },
-    onPick (player) {
-      this.$socket.emit('pick', {
+    onVote (player) {
+      this.$socket.emit('vote', {
         room: this.room,
-        pick: player.name
+        voter: this.username,
+        vote_receiver: player.name
       })
     },
     getSubmission: function (player) {
-      if (player.name === this.username && !this.isDealer) {
-        return player.submission // Your own submission should always be revealed, unless you are the dealer
-      }
       return this.submissionRevealed(player) ? player.submission : '[ Waiting for dealer to reveal ]'
     },
     submissionRevealed: function (player) {
@@ -196,11 +212,36 @@ export default {
     isWinner (player) {
       return player.isWinner
     },
+    onEndRound: function (force = false) {
+      if (this.isDealer || force) {
+        this.roundEndWarningSnackbar = false
+        this.allVotedSnackbar = false
+        this.$socket.emit('end', {
+          room: this.room
+        })
+      } else {
+        this.roundEndWarningSnackbar = true
+      }
+    },
     onNextRound: function () {
-      this.roundEndSnackbar = false
+      this.roundEndWarningSnackbar = false
+      this.allVotedSnackbar = false
+      this.allSubmittedSnackbar = false
       this.$socket.emit('next', {
         room: this.room
       })
+    }
+  },
+  watch: {
+    allVoted: function (val) {
+      if (val && this.isDealer) {
+        this.allVotedSnackbar = true
+      }
+    },
+    allSubmitted: function (val) {
+      if (val && this.isDealer) {
+        this.allSubmittedSnackbar = true
+      }
     }
   },
   computed: {
@@ -209,9 +250,11 @@ export default {
       pickCount: state => state.game.black_card.pick,
       blackCardText: state => state.game.black_card.text,
       hand: state => Object.keys(state.game.players[state.username].hand),
+      this_player: state => state.game.players[state.username],
       dealer: state => state.game.dealer,
       players: state => state.game.players,
-      roundsPlayed: state => state.game.rounds_played
+      roundsPlayed: state => state.game.rounds_played,
+      roundEnded: state => state.game.round_ended
     }),
     isDealer: function () {
       return this.username === this.dealer
@@ -240,7 +283,25 @@ export default {
       /* eslint-enable no-unused-vars */
       return ret
     },
+    numVoted: function () {
+      let ret = 0
+      /* eslint-disable no-unused-vars */
+      for (let [playerName, playerObj] of Object.entries(this.players)) {
+        if (playerObj.hasVoted) {
+          ret += 1
+        }
+      }
+      /* eslint-enable no-unused-vars */
+      return ret
+    },
+    allVoted: function () {
+      return this.numVoted === this.numPlayers
+    },
+    allSubmitted: function () {
+      return this.numSubmitted === this.numPlayers
+    },
     availableHand: function () {
+      // Available hand is this players hand minus cards selected for submission
       let ret = []
       for (let i = 0; i < this.hand.length; i++) {
         if (!this.cardsToSubmit.includes(this.hand[i])) {
@@ -253,7 +314,7 @@ export default {
       return Object.keys(this.players).length
     },
     submissionDone: function () {
-      return this.players[this.username].hasSubmitted
+      return this.this_player.hasSubmitted
     },
     submitDisabled: function () {
       if (this.cardsToSubmit.length !== this.pickCount || this.submissionDone) {
@@ -267,29 +328,48 @@ export default {
       }
       return false
     },
-    pickDisabled: function () {
+    voteDisabled: function () {
+      // Vote should be disabled if
+      //   - already voted
+      //   - there are any submitted cards that have not been revealed
+      //   - the round is won
+      if (this.this_player.hasVoted || this.roundEnded) {
+        return true
+      }
       /* eslint-disable no-unused-vars */
       for (let [playerName, playerObj] of Object.entries(this.players)) {
-        if ((playerObj.submissionRevealed === false && playerObj.hasSubmitted) || playerObj.isWinner === true) {
+        if (playerObj.submissionRevealed === false && playerObj.hasSubmitted) {
           return true
         }
       }
       /* eslint-enable no-unused-vars */
       return false
     },
-    roundWinner: {
+    roundEndMessage: {
       get: function () {
+        let winners = []
         /* eslint-disable no-unused-vars */
         for (let [playerName, playerObj] of Object.entries(this.players)) {
           if (playerObj.isWinner === true) {
-            return playerObj.name
+            winners.push(playerName)
           }
         }
         /* eslint-enable no-unused-vars */
-        return null
+        let ret = ''
+        if (winners.length === 0) {
+          ret = 'There were no winners in this round'
+        } else if (winners.length === 1) {
+          ret = winners[0] + ' won this round'
+        } else {
+          ret = winners.join(', ') + ' won this round'
+        }
+        return ret
       },
       set: function () {
       }
+    },
+    numCardsNeeded: function () {
+      return this.pickCount - this.cardsToSubmit.length
     }
   },
   mounted () {
