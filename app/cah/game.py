@@ -120,8 +120,6 @@ class Game:
             "rounds_played": self.rounds_played,
             "round_ended": self.round_ended
         }
-        import pprint as pp
-        pp.pprint(ret)
         return ret
 
     class PlayerExistsError(Exception):
