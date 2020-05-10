@@ -1,4 +1,6 @@
-from flask import Blueprint, request
+from sys import getsizeof
+
+from flask import Blueprint, request, jsonify
 import flask_socketio as sio
 
 from app import socket_io_app, app
@@ -13,20 +15,15 @@ cah_bp = Blueprint('cah', __name__,
                    )
 
 
-# @app.route('/stats')
-# def stats():
-#     '''display room stats'''
-#     resp = {
-#         'total': len(ROOMS.keys()),
-#         'bytes_used': getsizeof(ROOMS)
-#     }
-#     if 'rooms' in request.args:
-#         if ROOMS:
-#             resp['rooms'] = sorted([ v.to_json() for v in ROOMS.values() ],
-#                                    key=lambda k: k.get('date_modified'), reverse=True)
-#         else:
-#             resp['rooms'] = None
-#     return jsonify(resp)
+@app.route('/info')
+def stats():
+    resp = {
+        'numRooms': len(RoomManager.rooms),
+        'totalPlayers': sum(len(g.players) for g in RoomManager.rooms.values()),
+        'bytesUsed': getsizeof(RoomManager.rooms),
+        'rooms': {k: v.summary() for k, v in RoomManager.rooms.items()}
+    }
+    return jsonify(resp)
 
 
 @socket_io_app.on('list_decks')

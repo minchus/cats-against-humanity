@@ -122,6 +122,17 @@ class Game:
         }
         return ret
 
+    def summary(self):
+        ret = {
+            "room_code": self.room_code,
+            "players": list(self.players.keys()),
+            "date_created": str(self.date_created),
+            "date_modified": str(self.date_modified),
+            "playtime": self.playtime(),
+            "rounds_played": self.rounds_played
+        }
+        return ret
+
     class PlayerExistsError(Exception):
         pass
 
