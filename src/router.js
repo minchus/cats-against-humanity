@@ -8,7 +8,6 @@ import Player from './views/Player.vue'
 Vue.use(Router)
 
 export default new Router({
-  mode: 'history',
   routes: [
     {
       path: '/',
