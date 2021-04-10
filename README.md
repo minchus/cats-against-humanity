@@ -1,13 +1,6 @@
 # Cats Against Humanity 🙀 
 
-_Cards against humanity online (and with added cat)_
-
-### Application Structure
-
-#### Rest Api
-
-The Api is served using a Flask blueprint at `/api/` using Flask RestPlus class-based
-resource routing.
+An online version of the game "Cards Against Humanity" (with added cats)
 
 #### Websockets
 
@@ -17,16 +10,14 @@ Websockets are used to enable the real time behaviour of the game. The server us
 
 A Flask view is used to serve the `index.html` as an entry point into the Vue app at the endpoint `/`.
 
-The template uses vue-cli 3 and assumes Vue Cli & Webpack will manage front-end resources and assets, so it does overwrite template delimiter.
+The template uses vue-cli 3 and assumes Vue Cli & Webpack will manage front-end resources and assets.
 
-The Vue instance is preconfigured with Filters, Vue-Router, Vuex; each of these can easilly removed if they are not desired.
 
 #### Important Files
 
 | Location             |  Content                                   |
 |----------------------|--------------------------------------------|
 | `/app`               | Flask Application                          |
-| `/app/api`           | Flask Rest Api (`/api`)                    |
 | `/app/client.py`     | Flask Client (`/`)                         |
 | `/src`               | Vue App .                                  |
 | `/src/main.js`       | JS Application Entry Point                 |
@@ -39,8 +30,8 @@ The Vue instance is preconfigured with Filters, Vue-Router, Vuex; each of these 
 
 ##### Prerequisites
 
-- [X] Node v11.15.0 (had issues with 12 and 13)
-- [X] Yarn (using 1.x global install)
+- [X] Node
+- [X] Yarn
 - [X] Vue Cli 3
 - [X] Python 3
 - [X] Pipenv
@@ -50,7 +41,7 @@ The Vue instance is preconfigured with Filters, Vue-Router, Vuex; each of these 
 
 * Clone this repository:
 	```
-	$ git clone https://github.com/MingusKhan/cats-against-humanity.git
+	$ git clone https://github.com/minchus/cats-against-humanity.git
 	```
  
 * Setup node
@@ -62,7 +53,6 @@ The Vue instance is preconfigured with Filters, Vue-Router, Vuex; each of these 
 * Setup virtual environment, install dependencies, and activate it:
 	```
 	$ pipenv install --dev
-	$ pipenv shell
 	```
 
 * Install JS dependencies
@@ -102,14 +92,13 @@ $ python run.py
 
 ## Production Server
 
-This template is configured to work with Heroku + Gunicorn and it's pre-configured
-to have Heroku build the application before releasing it.
+Gunicorn is used as the production server when deployed on Heroku
 
 #### JS Build Process
 
-Heroku's nodejs buidlpack will handle install for all the dependencies from the `packages.json` file.
+Heroku's nodejs buildpack will handle install for all the dependencies from the `packages.json` file.
 It will then trigger the `postinstall` command which calls `yarn build`.
-This will create the bundled `dist` folder which will be served by whitenoise.
+This will create the bundled `dist` folder which will be served by Flask.
 
 #### Python Build Process
 
@@ -132,4 +121,4 @@ Here are the commands we need to run to get things setup on the Heroku side:
 	$ heroku ps:scale web=1
 	```
 ### Heroku deployment - One Click Deploy
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/MingusKhan/cats-against-humanity)
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/minchus/cats-against-humanity)
