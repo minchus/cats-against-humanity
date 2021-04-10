@@ -1,4 +1,6 @@
-from flask import Blueprint, request
+from sys import getsizeof
+
+from flask import Blueprint, request, jsonify
 import flask_socketio as sio
 
 from app import socket_io_app, app
@@ -13,20 +15,15 @@ cah_bp = Blueprint('cah', __name__,
                    )
 
 
-# @app.route('/stats')
-# def stats():
-#     '''display room stats'''
-#     resp = {
-#         'total': len(ROOMS.keys()),
-#         'bytes_used': getsizeof(ROOMS)
-#     }
-#     if 'rooms' in request.args:
-#         if ROOMS:
-#             resp['rooms'] = sorted([ v.to_json() for v in ROOMS.values() ],
-#                                    key=lambda k: k.get('date_modified'), reverse=True)
-#         else:
-#             resp['rooms'] = None
-#     return jsonify(resp)
+@app.route('/info')
+def stats():
+    resp = {
+        'numRooms': len(RoomManager.rooms),
+        'totalPlayers': sum(len(g.players) for g in RoomManager.rooms.values()),
+        'bytesUsed': getsizeof(RoomManager.rooms),
+        'rooms': {k: v.summary() for k, v in RoomManager.rooms.items()}
+    }
+    return jsonify(resp)
 
 
 @socket_io_app.on('list_decks')
@@ -122,21 +119,38 @@ def on_reveal(data):
         sio.emit('error', {'error': f'Player does not exist: {username}'})
 
 
-@socket_io_app.on('pick')
-def on_pick(data):
+@socket_io_app.on('vote')
+def on_vote(data):
     app.logger.info(data)
     room_code = data['room']
-    winner_name = data['pick']
+    voter = data['voter']
+    vote_receiver = data['vote_receiver']
     try:
         g = RoomManager.get_game(room_code=room_code)
-        g.winner_selected(name=winner_name)
+        g.add_vote(voter=voter, vote_receiver=vote_receiver)
         sio.send(g.serialize(), room=g.room_code)
     except Game.PlayerNotExistsError:
-        app.logger.debug(f'Player {winner_name} does not exist')
-        sio.emit('error', {'error': f'Player {winner_name} does not exist'})
-    except Game.AlreadyWonError:
+        app.logger.debug(f'Player does not exist')
+        sio.emit('error', {'error': f'Player does not exist'})
+    except Game.AlreadyEndedError:
         app.logger.debug(f'The round has already ended')
         sio.emit('error', {'error': f'The round has already ended'})
+    except RoomManager.NoRoomError:
+        app.logger.debug(f'Room {room_code} does not exist')
+        sio.emit('error', {'error': f'Room {room_code} does not exist.'})
+    except Game.AlreadyVotedError:
+        app.logger.debug(f'Player {voter} has already voted')
+        sio.emit('error', {'error': f'You have already voted'})
+
+
+@socket_io_app.on('end')
+def on_end(data):
+    app.logger.info(data)
+    room_code = data['room']
+    try:
+        g = RoomManager.get_game(room_code=room_code)
+        g.end_round()
+        sio.send(g.serialize(), room=g.room_code)
     except RoomManager.NoRoomError:
         app.logger.debug(f'Room {room_code} does not exist')
         sio.emit('error', {'error': f'Room {room_code} does not exist.'})

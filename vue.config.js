@@ -3,7 +3,7 @@ module.exports = {
   'assetsDir': 'static',
   'devServer': {
     'proxy': {
-      '/api*': {
+      '/info': {
         'target': 'http://localhost:5000/'
       },
       '/socket.io': {

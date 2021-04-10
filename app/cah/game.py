@@ -62,6 +62,8 @@ class Player:
         self.submissionNumber = 0
         self.isWinner = False
         self.submittedCards = []
+        self.hasVoted = False
+        self.votes = 0
 
     def serialize(self):
         return self.__dict__
@@ -83,6 +85,8 @@ class Player:
         self.hasSubmitted = False
         self.submissionNumber = 0
         self.isWinner = False
+        self.hasVoted = False
+        self.votes = 0
 
 
 class Game:
@@ -96,7 +100,7 @@ class Game:
         self.date_created = datetime.now()
         self.date_modified = self.date_created
         self.submissionNumber = 0
-        self.round_won = False
+        self.round_ended = False
         self.rounds_played = 0
 
         self.black_deck, self.white_deck = Game.CARD_DATA.get_decks(deck_code_list)
@@ -110,6 +114,18 @@ class Game:
             "players": {name: player.serialize() for name, player in self.players.items()},
             "dealer": self.dealer,
             "black_card": self.current_black_card,
+            "date_created": str(self.date_created),
+            "date_modified": str(self.date_modified),
+            "playtime": self.playtime(),
+            "rounds_played": self.rounds_played,
+            "round_ended": self.round_ended
+        }
+        return ret
+
+    def summary(self):
+        ret = {
+            "room_code": self.room_code,
+            "players": list(self.players.keys()),
             "date_created": str(self.date_created),
             "date_modified": str(self.date_modified),
             "playtime": self.playtime(),
@@ -157,29 +173,46 @@ class Game:
         p = self.players[player_name]
         p.submissionRevealed = True
 
-    class AlreadyWonError(Exception):
+    class AlreadyEndedError(Exception):
         pass
 
-    def winner_selected(self, name):
-        if name not in self.players:
+    class AlreadyVotedError(Exception):
+        pass
+
+    def add_vote(self, voter, vote_receiver):
+        if voter not in self.players or vote_receiver not in self.players:
             raise Game.PlayerNotExistsError
-        if self.round_won:
-            raise Game.AlreadyWonError
-        p = self.players[name]
-        p.isWinner = True
-        p.roundsWon += 1
-        self.round_won = True
+        if self.round_ended:
+            raise Game.AlreadyEndedError
+
+        v = self.players[voter]
+        if v.hasVoted:
+            raise Game.AlreadyVotedError
+        v.hasVoted = True
+
+        p = self.players[vote_receiver]
+        p.votes += 1
+
+    def end_round(self):
+        self.round_ended = True
+        max_votes = max(player.votes for player in self.players.values())
+        for name, player in self.players.items():
+            if player.votes == max_votes and player.votes > 0:
+                player.roundsWon += 1
+                player.isWinner = True
 
     def next_round(self):
-        self.round_won = False
+        self.round_ended = False
         self.submissionNumber = 0
         self.rounds_played += 1
 
+        # Put used cards in discard piles
         for name, player in self.players.items():
             player.end_round(self.white_deck)
         self.black_deck.discard(self.current_black_card)
         self.current_black_card = self.black_deck.draw(1)[0]
 
+        # Select the next dealer
         if len(self.players) > 1:
             names = list(self.players.keys())
             self.dealer = names[(names.index(self.dealer) + 1) % len(names)]
