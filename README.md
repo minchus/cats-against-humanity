@@ -43,8 +43,12 @@ The template uses vue-cli 3 and assumes Vue Cli & Webpack will manage front-end 
 	```
 	$ git clone https://github.com/minchus/cats-against-humanity.git
 	```
+
+* Install node and python
+Use `nvm` and `pyenv` to install the required versions of node and python.
  
-* Setup node
+
+* Setup node for Windows
 	```
 	$ npm install --global windows-build-tools
 	$ npm config set python python2.7
@@ -53,6 +57,10 @@ The template uses vue-cli 3 and assumes Vue Cli & Webpack will manage front-end 
 * Setup virtual environment, install dependencies, and activate it:
 	```
 	$ pipenv install --dev
+
+  # or
+
+	$ pip install -r requirements.txt
 	```
 
 * Install JS dependencies
@@ -90,21 +98,29 @@ $ yarn build
 $ python run.py
 ```
 
-## Production Server
+## Docker images
+```
+# Build
+docker build --no-cache -t node-python -f docker/node-python.dockerfile .
+docker build --no-cache -t cats-against-humanity -f docker/dockerfile .
+
+# Get a shell
+docker run --rm -it -v $(pwd):/code --entrypoint /bin/sh cats-against-humanity:latest
+
+# Run locally
+docker run -d --restart=always -p 8080:5000 cats-against-humanity:latest
+```
+
+## Building and Deploying on Heroku (deprecated)
+The Heroku free tier has been deprecated.
 
 Gunicorn is used as the production server when deployed on Heroku
-
-#### JS Build Process
 
 Heroku's nodejs buildpack will handle install for all the dependencies from the `packages.json` file.
 It will then trigger the `postinstall` command which calls `yarn build`.
 This will create the bundled `dist` folder which will be served by Flask.
 
-#### Python Build Process
-
 The python buildpack will detect the `Pipfile` and install all the python dependencies.
-
-#### Production Sever Setup
 
 Here are the commands we need to run to get things setup on the Heroku side:
 
