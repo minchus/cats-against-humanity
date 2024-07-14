@@ -42,7 +42,6 @@ RUN yarn build
 
 FROM base as runner
 
-ADD ./dist /cats/dist
 ADD ./app /cats/app
 ADD requirements.txt /cats/requirements.txt
 COPY --from=builder /code/dist /cats/dist
