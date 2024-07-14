@@ -110,6 +110,11 @@ docker run --rm -it -v $(pwd):/code --entrypoint /bin/sh cats-against-humanity:l
 docker run -d --restart=always -p 8080:5000 cats-against-humanity:latest
 ```
 
+
+## Deployment on DigitalOcean App Platform
+App Platform sets the PORT environment variable to the port for your service to listen on 
+([docs](https://docs.digitalocean.com/support/how-to-troubleshoot-apps-in-app-platform/#check-for-a-misconfigured-port-or-network-interface))
+
 ## Building and Deploying on Heroku (deprecated)
 The Heroku free tier has been deprecated.
 
