@@ -59,6 +59,8 @@ RUN apk del \
     openssl-dev \
     musl-dev
 
-EXPOSE 5000
+# allow PORT to be passed as environment variable at container runtime (default to 5000)
+ENV PORT 5000
 
-CMD ["gunicorn", "--worker-class", "eventlet", "-w", "1", "--bind", "0.0.0.0:5000", "--log-file", "-", "app:app"]
+CMD ["sh", "-c", "gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT --log-file - app:app"]
+

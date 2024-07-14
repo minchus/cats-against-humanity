@@ -101,8 +101,7 @@ $ python run.py
 ## Docker images
 ```
 # Build
-docker build --no-cache -t node-python -f docker/node-python.dockerfile .
-docker build --no-cache -t cats-against-humanity -f docker/dockerfile .
+docker build --no-cache -t cats-against-humanity .
 
 # Get a shell
 docker run --rm -it -v $(pwd):/code --entrypoint /bin/sh cats-against-humanity:latest
