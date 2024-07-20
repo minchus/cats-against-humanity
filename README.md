@@ -65,6 +65,7 @@ Use `nvm` and `pyenv` to install the required versions of node and python.
 
 * Install JS dependencies
 	```
+	$ nvm use 14.16.0
 	$ yarn install
 	```
 
@@ -94,6 +95,7 @@ If you would rather run a single dev server, you can run Flask's
 development server only on `:5000`, but you have to build build the Vue app first
 and the page will not reload on changes.
 ```
+$ nvm use 14.16.0
 $ yarn build
 $ python run.py
 ```

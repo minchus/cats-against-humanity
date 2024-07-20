@@ -1,4 +1,4 @@
-from flask import Flask, current_app, send_file
+from flask import Flask, current_app, send_file, send_from_directory
 from flask_socketio import SocketIO
 import logging
 import os
@@ -21,4 +21,10 @@ def index_client():
     entry = os.path.join(dist_dir, 'index.html')
     return send_file(entry)
 
+
+@app.route('/favicon.ico')
+def favicon():
+    dist_dir = current_app.config['DIST_DIR']
+    favicon = os.path.join(dist_dir, 'favicon.ico')
+    return send_file(favicon)
 
