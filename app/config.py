@@ -1,8 +1,6 @@
 """
 Global Flask Application Setting
-
-See `.flaskenv` for default settings.
- """
+"""
 
 import os
 from app import app
